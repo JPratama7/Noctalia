@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import qs.Commons
 import qs.Services
 import qs.Widgets
@@ -8,7 +7,7 @@ Row {
   id: root
   anchors.verticalCenter: parent.verticalCenter
   spacing: Style.marginSmall * scaling
-  visible: (Settings.data.bar.showSystemInfo)
+  visible: Settings.data.bar.showSystemInfo
 
   Rectangle {
     // Let the Rectangle size itself based on its content (the Row)
