@@ -82,6 +82,7 @@ Singleton {
         property bool showTray: true
         property bool showTaskbar: true
         property string taskbarPosition: "left"
+        property real backgroundOpacity: 1.0
         property list<string> monitors: []
       }
 
@@ -203,6 +204,8 @@ Singleton {
         property bool useWallpaperColors: false
         property string predefinedScheme: ""
         property bool darkMode: true
+        // External app theming (GTK & Qt)
+        property bool themeApps: true
       }
     }
   }

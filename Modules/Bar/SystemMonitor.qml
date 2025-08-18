@@ -92,8 +92,7 @@ Row {
       }
     }
   }
-}// Row {
-//   id: layout
+} // Row {//   id: layout
 //   anchors.verticalCenter: parent.verticalCenter
 //   spacing: Style.marginSmall * scaling
 //   visible: Settings.data.bar.showSystemInfo
