@@ -80,6 +80,8 @@ Singleton {
         property bool showBrightness: true
         property bool showNotificationsHistory: true
         property bool showTray: true
+        property bool showTaskbar: true
+        property string taskbarPosition: "left"
         property list<string> monitors: []
       }
 
