@@ -55,6 +55,13 @@ Variants {
 
         SystemMonitor {}
 
+        // Taskbar placement: if left
+        Loader {
+          active: Settings.data.bar.taskbarPosition === "left" && Settings.data.bar.showTaskbar
+          sourceComponent: Taskbar {}
+          anchors.verticalCenter: parent.verticalCenter
+        }
+
         ActiveWindow {}
 
         MediaMini {}
@@ -69,6 +76,13 @@ Variants {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Style.marginSmall * scaling
 
+        // Taskbar placement: if center
+        Loader {
+          active: Settings.data.bar.taskbarPosition === "center" && Settings.data.bar.showTaskbar
+          sourceComponent: Taskbar {}
+          anchors.verticalCenter: parent.verticalCenter
+        }
+
         Workspace {}
       }
 
@@ -81,6 +95,13 @@ Variants {
         anchors.rightMargin: Style.marginSmall * scaling
         anchors.verticalCenter: bar.verticalCenter
         spacing: Style.marginSmall * scaling
+
+        // Taskbar placement: if right
+        Loader {
+          active: Settings.data.bar.taskbarPosition === "right" && Settings.data.bar.showTaskbar
+          sourceComponent: Taskbar {}
+          anchors.verticalCenter: parent.verticalCenter
+        }
 
         // Screen Recording Indicator
         NIconButton {
