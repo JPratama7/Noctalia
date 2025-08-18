@@ -49,9 +49,9 @@ Variants {
 
         height: parent.height
         anchors.left: parent.left
-        anchors.leftMargin: Style.marginSmall * scaling
+        anchors.leftMargin: Style.marginS * scaling
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Style.marginSmall * scaling
+        spacing: Style.marginS * scaling
 
         SystemMonitor {}
 
@@ -74,7 +74,7 @@ Variants {
         height: parent.height
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Style.marginSmall * scaling
+        spacing: Style.marginS * scaling
 
         // Taskbar placement: if center
         Loader {
@@ -92,9 +92,9 @@ Variants {
 
         height: parent.height
         anchors.right: bar.right
-        anchors.rightMargin: Style.marginSmall * scaling
+        anchors.rightMargin: Style.marginS * scaling
         anchors.verticalCenter: bar.verticalCenter
-        spacing: Style.marginSmall * scaling
+        spacing: Style.marginS * scaling
 
         // Taskbar placement: if right
         Loader {
