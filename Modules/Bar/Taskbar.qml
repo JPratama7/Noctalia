@@ -81,7 +81,7 @@ Row {
 
             IconImage {
               id: appIcon
-              anchors.centerIn: parent``
+              anchors.centerIn: parent
               width: root.iconSize
               height: root.iconSize
               source: appButton.iconSource
