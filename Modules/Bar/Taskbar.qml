@@ -23,25 +23,29 @@ Row {
     positionAbove: true
   }
 
-  // Background container similar to SystemMonitor
   Rectangle {
     // Size to content with horizontal padding
     width: row.width + Style.marginMedium * root.scaling * 2
-    height: row.height
+    
+    height: Math.round(Style.barHeight * 0.75 * root.scaling)
+    radius: Math.round(Style.radiusMedium * root.scaling)
     color: Color.mSurfaceVariant
-    radius: Style.radiusSmall * root.scaling
+    border.color: Color.mOutline
+    border.width: Math.max(1, Math.round(Style.borderThin * root.scaling))
+    
     anchors.verticalCenter: parent.verticalCenter
 
     Item {
       id: mainContainer
       anchors.fill: parent
-      anchors.margins: Style.marginSmall * root.scaling
+      anchors.leftMargin: Style.marginSmall * root.scaling
+      anchors.rightMargin: Style.marginSmall * root.scaling
 
       Row {
         id: row
         anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: Style.marginTiny * root.scaling
+        // Remove horizontal center to match SystemMonitor's layout
+        spacing: Style.marginSmall * root.scaling
 
         Repeater {
           model: ToplevelManager ? ToplevelManager.toplevels : null
