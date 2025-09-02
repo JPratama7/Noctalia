@@ -31,6 +31,11 @@ NBox {
       colorFg: ScreenRecorderService.isRecording ? Color.mOnPrimary : Color.mPrimary
       onClicked: {
         ScreenRecorderService.toggleRecording()
+        // If we were not recording and we just initiated a start, close the panel
+        if (!ScreenRecorderService.isRecording) {
+          var panel = PanelService.getPanel("sidePanel")
+          panel && panel.close()
+        }
       }
     }
 
@@ -47,12 +52,16 @@ NBox {
 
     // Wallpaper
     NIconButton {
+      visible: Settings.data.wallpaper.enabled
       icon: "image"
-      tooltipText: "Open wallpaper selector"
+      tooltipText: "Left click: Open wallpaper selector\nRight click: Set random wallpaper"
       onClicked: {
         var settingsPanel = PanelService.getPanel("settingsPanel")
         settingsPanel.requestedTab = SettingsPanel.Tab.WallpaperSelector
         settingsPanel.open(screen)
+      }
+      onRightClicked: {
+        WallpaperService.setRandomWallpaper()
       }
     }
 

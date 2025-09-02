@@ -10,7 +10,16 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
+  NToggle {
+    label: "Enable Wallpaper Management"
+    description: "Manage wallpapers with Noctalia. (Uncheck if you prefer using another application)."
+    checked: Settings.data.wallpaper.enabled
+    onToggled: checked => Settings.data.wallpaper.enabled = checked
+    Layout.bottomMargin: Style.marginL * scaling
+  }
+
   ColumnLayout {
+    visible: Settings.data.wallpaper.enabled
     spacing: Style.marginL * scaling
     Layout.fillWidth: true
     NTextInput {
@@ -69,12 +78,115 @@ ColumnLayout {
   }
 
   NDivider {
+    visible: Settings.data.wallpaper.enabled
     Layout.fillWidth: true
     Layout.topMargin: Style.marginXL * scaling
     Layout.bottomMargin: Style.marginXL * scaling
   }
 
   ColumnLayout {
+    visible: Settings.data.wallpaper.enabled
+    spacing: Style.marginL * scaling
+    Layout.fillWidth: true
+
+    NText {
+      text: "Look & Feel"
+      font.pointSize: Style.fontSizeXXL * scaling
+      font.weight: Style.fontWeightBold
+      color: Color.mSecondary
+    }
+
+    // Fill Mode
+    NComboBox {
+      label: "Fill Mode"
+      description: "Select how the image should scale to match your monitor's resolution."
+      model: WallpaperService.fillModeModel
+      currentKey: Settings.data.wallpaper.fillMode
+      onSelected: key => Settings.data.wallpaper.fillMode = key
+    }
+
+    RowLayout {
+      NLabel {
+        label: "Fill Color"
+        description: "Choose a fill color that may appear behind the wallpaper."
+        Layout.alignment: Qt.AlignTop
+      }
+
+      NColorPicker {
+        selectedColor: Settings.data.wallpaper.fillColor
+        onColorSelected: color => Settings.data.wallpaper.fillColor = color
+        onColorCancelled: selectedColor = Settings.data.wallpaper.fillColor
+      }
+    }
+
+    // Transition Type
+    NComboBox {
+      label: "Transition Type"
+      description: "Animation type when switching between wallpapers."
+      model: WallpaperService.transitionsModel
+      currentKey: Settings.data.wallpaper.transitionType
+      onSelected: key => Settings.data.wallpaper.transitionType = key
+    }
+
+    // Transition Duration
+    ColumnLayout {
+      NLabel {
+        label: "Transition Duration"
+        description: "Duration of transition animations in seconds."
+      }
+
+      RowLayout {
+        spacing: Style.marginL * scaling
+        NSlider {
+          Layout.fillWidth: true
+          from: 100
+          to: 5000
+          stepSize: 100
+          value: Settings.data.wallpaper.transitionDuration
+          onMoved: Settings.data.wallpaper.transitionDuration = value
+          cutoutColor: Color.mSurface
+        }
+        NText {
+          text: (Settings.data.wallpaper.transitionDuration / 1000).toFixed(2) + "s"
+          Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+        }
+      }
+    }
+
+    // Edge Smoothness
+    ColumnLayout {
+      NLabel {
+        label: "Transition Edge Smoothness"
+        description: "Duration of transition animations in seconds."
+      }
+
+      RowLayout {
+        spacing: Style.marginL * scaling
+        NSlider {
+          Layout.fillWidth: true
+          from: 0.0
+          to: 1.0
+          value: Settings.data.wallpaper.transitionEdgeSmoothness
+          onMoved: Settings.data.wallpaper.transitionEdgeSmoothness = value
+          cutoutColor: Color.mSurface
+        }
+        NText {
+          text: Math.round(Settings.data.wallpaper.transitionEdgeSmoothness * 100) + "%"
+          Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+        }
+      }
+    }
+  }
+
+  NDivider {
+    visible: Settings.data.wallpaper.enabled
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginXL * scaling
+    Layout.bottomMargin: Style.marginXL * scaling
+  }
+
+  ColumnLayout {
+    visible: Settings.data.wallpaper.enabled
     spacing: Style.marginL * scaling
     Layout.fillWidth: true
 
@@ -188,64 +300,6 @@ ColumnLayout {
               presetRow.customForcedVisible = true
             }
           }
-        }
-      }
-    }
-
-    // Transition Type
-    NComboBox {
-      label: "Transition Type"
-      description: "Animation type when switching between wallpapers."
-      model: WallpaperService.transitionsModel
-      currentKey: Settings.data.wallpaper.transitionType
-      onSelected: key => Settings.data.wallpaper.transitionType = key
-    }
-
-    // Transition Duration
-    ColumnLayout {
-      NLabel {
-        label: "Transition Duration"
-        description: "Duration of transition animations in seconds."
-      }
-
-      RowLayout {
-        spacing: Style.marginL * scaling
-        NSlider {
-          Layout.fillWidth: true
-          from: 100
-          to: 5000
-          stepSize: 100
-          value: Settings.data.wallpaper.transitionDuration
-          onMoved: Settings.data.wallpaper.transitionDuration = value
-          cutoutColor: Color.mSurface
-        }
-        NText {
-          text: (Settings.data.wallpaper.transitionDuration / 1000).toFixed(2) + "s"
-          Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-        }
-      }
-    }
-
-    // Edge Smoothness
-    ColumnLayout {
-      NLabel {
-        label: "Transition Edge Smoothness"
-        description: "Duration of transition animations in seconds."
-      }
-
-      RowLayout {
-        spacing: Style.marginL * scaling
-        NSlider {
-          Layout.fillWidth: true
-          from: 0.0
-          to: 1.0
-          value: Settings.data.wallpaper.transitionEdgeSmoothness
-          onMoved: Settings.data.wallpaper.transitionEdgeSmoothness = value
-          cutoutColor: Color.mSurface
-        }
-        NText {
-          text: Math.round(Settings.data.wallpaper.transitionEdgeSmoothness * 100) + "%"
-          Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
         }
       }
     }

@@ -12,12 +12,25 @@ Variants {
   delegate: Loader {
     required property ShellScreen modelData
 
-    active: Settings.isLoaded && CompositorService.isNiri && modelData
+    active: Settings.isLoaded && CompositorService.isNiri && modelData && Settings.data.wallpaper.enabled
+
+    property string wallpaper: ""
 
     sourceComponent: PanelWindow {
       Component.onCompleted: {
         if (modelData) {
           Logger.log("Overview", "Loading Overview component for Niri on", modelData.name)
+        }
+        wallpaper = modelData ? WallpaperService.getWallpaper(modelData.name) : ""
+      }
+
+      // External state management
+      Connections {
+        target: WallpaperService
+        function onWallpaperChanged(screenName, path) {
+          if (screenName === modelData.name) {
+            wallpaper = path
+          }
         }
       }
 
@@ -38,7 +51,7 @@ Variants {
         id: bgImage
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
-        source: modelData ? WallpaperService.getWallpaper(modelData.name) : ""
+        source: wallpaper
         smooth: true
         mipmap: false
         cache: false
@@ -52,9 +65,12 @@ Variants {
         blurMax: 128
       }
 
+      // Make the overview darker
       Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(Color.mSurface.r, Color.mSurface.g, Color.mSurface.b, 0.5)
+        color: Settings.data.colorSchemes.darkMode ? Qt.rgba(Color.mSurface.r, Color.mSurface.g, Color.mSurface.b,
+                                                             0.5) : Qt.rgba(Color.mOnSurface.r, Color.mOnSurface.g,
+                                                                            Color.mOnSurface.b, 0.5)
       }
     }
   }

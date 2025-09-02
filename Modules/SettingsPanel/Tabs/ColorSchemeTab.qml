@@ -63,7 +63,8 @@ ColumnLayout {
       if (exitCode === 0) {
         // Matugen exists, enable it
         Settings.data.colorSchemes.useWallpaperColors = true
-        ColorSchemeService.changedWallpaper()
+        Settings.data.colorSchemes.predefinedScheme = ""
+        MatugenService.generateFromWallpaper()
         ToastService.showNotice("Matugen", "Enabled")
       } else {
         // Matugen not found
@@ -248,7 +249,6 @@ ColumnLayout {
               // Color swatches
               RowLayout {
                 id: swatches
-
 
                 spacing: Style.marginS * scaling
                 Layout.fillWidth: true
@@ -462,6 +462,23 @@ ColumnLayout {
       checked: Settings.data.matugen.vesktop
       onToggled: checked => {
                    Settings.data.matugen.vesktop = checked
+                   if (Settings.data.colorSchemes.useWallpaperColors)
+                   MatugenService.generateFromWallpaper()
+                 }
+    }
+
+    NDivider {
+      Layout.fillWidth: true
+      Layout.topMargin: Style.marginM * scaling
+      Layout.bottomMargin: Style.marginM * scaling
+    }
+
+    NCheckbox {
+      label: "User Templates"
+      description: "Enable user-defined Matugen config from ~/.config/matugen/config.toml"
+      checked: Settings.data.matugen.enableUserTemplates
+      onToggled: checked => {
+                   Settings.data.matugen.enableUserTemplates = checked
                    if (Settings.data.colorSchemes.useWallpaperColors)
                    MatugenService.generateFromWallpaper()
                  }

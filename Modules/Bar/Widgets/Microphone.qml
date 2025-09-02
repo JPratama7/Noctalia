@@ -17,27 +17,42 @@ Item {
   property int sectionWidgetsCount: 0
 
   // Used to avoid opening the pill on Quickshell startup
-  property bool firstVolumeReceived: false
+  property bool firstInputVolumeReceived: false
   property int wheelAccumulator: 0
 
   implicitWidth: pill.width
   implicitHeight: pill.height
 
   function getIcon() {
-    if (AudioService.muted) {
-      return "volume_off"
+    if (AudioService.inputMuted) {
+      return "mic_off"
     }
-    return AudioService.volume <= Number.EPSILON ? "volume_off" : (AudioService.volume < 0.33 ? "volume_down" : "volume_up")
+    return AudioService.inputVolume <= Number.EPSILON ? "mic_off" : (AudioService.inputVolume < 0.33 ? "mic" : "mic")
   }
 
-  // Connection used to open the pill when volume changes
+  // Connection used to open the pill when input volume changes
   Connections {
-    target: AudioService.sink?.audio ? AudioService.sink?.audio : null
+    target: AudioService.source?.audio ? AudioService.source?.audio : null
     function onVolumeChanged() {
-      // Logger.log("Bar:Volume", "onVolumeChanged")
-      if (!firstVolumeReceived) {
+      // Logger.log("Bar:Microphone", "onInputVolumeChanged")
+      if (!firstInputVolumeReceived) {
         // Ignore the first volume change
-        firstVolumeReceived = true
+        firstInputVolumeReceived = true
+      } else {
+        pill.show()
+        externalHideTimer.restart()
+      }
+    }
+  }
+
+  // Connection used to open the pill when input mute state changes
+  Connections {
+    target: AudioService.source?.audio ? AudioService.source?.audio : null
+    function onMutedChanged() {
+      // Logger.log("Bar:Microphone", "onInputMutedChanged")
+      if (!firstInputVolumeReceived) {
+        // Ignore the first mute change
+        firstInputVolumeReceived = true
       } else {
         pill.show()
         externalHideTimer.restart()
@@ -62,18 +77,18 @@ Item {
     iconCircleColor: Color.mPrimary
     collapsedIconColor: Color.mOnSurface
     autoHide: false // Important to be false so we can hover as long as we want
-    text: Math.floor(AudioService.volume * 100) + "%"
-    tooltipText: "Volume: " + Math.round(
-                   AudioService.volume * 100) + "%\nLeft click for advanced settings.\nScroll up/down to change volume."
+    text: Math.floor(AudioService.inputVolume * 100) + "%"
+    tooltipText: "Microphone: " + Math.round(AudioService.inputVolume * 100)
+                 + "%\nLeft click for advanced settings.\nScroll up/down to change volume.\nRight click to toggle mute."
 
     onWheel: function (delta) {
       wheelAccumulator += delta
       if (wheelAccumulator >= 120) {
         wheelAccumulator = 0
-        AudioService.increaseVolume()
+        AudioService.setInputVolume(AudioService.inputVolume + AudioService.stepVolume)
       } else if (wheelAccumulator <= -120) {
         wheelAccumulator = 0
-        AudioService.decreaseVolume()
+        AudioService.setInputVolume(AudioService.inputVolume - AudioService.stepVolume)
       }
     }
     onClicked: {
@@ -82,7 +97,7 @@ Item {
       settingsPanel.open(screen)
     }
     onRightClicked: {
-      pwvucontrolProcess.running = true
+      AudioService.setInputMuted(!AudioService.inputMuted)
     }
   }
 

@@ -14,8 +14,16 @@ Rectangle {
   id: root
 
   property ShellScreen screen
-  property real scaling: ScalingService.scale(screen)
+  property real scaling: 1.0
   readonly property real itemSize: 24 * scaling
+
+  function onLoaded() {
+    // When the widget is fully initialized with its props
+    // set the screen for the trayMenu
+    if (trayMenu.item) {
+      trayMenu.item.screen = screen
+    }
+  }
 
   visible: SystemTray.items.values.length > 0
   implicitWidth: tray.width + Style.marginM * scaling * 2
@@ -156,12 +164,6 @@ Rectangle {
     Loader {
       id: trayMenu
       source: "../Extras/TrayMenu.qml"
-
-      onLoaded: {
-        if (item) {
-          item.screen = screen
-        }
-      }
     }
   }
 }

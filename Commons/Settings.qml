@@ -30,6 +30,9 @@ Singleton {
 
   property bool isLoaded: false
 
+  // Signal emitted when settings are loaded after startupcale changes
+  signal settingsLoaded
+
   // Function to validate monitor configurations
   function validateMonitorConfigurations() {
     var availableScreenNames = []
@@ -93,6 +96,9 @@ Singleton {
         Logger.log("Settings", "----------------------------")
         Logger.log("Settings", "Settings loaded successfully")
         isLoaded = true
+
+        // Emit the signal
+        root.settingsLoaded()
 
         Qt.callLater(function () {
           // Some stuff like settings validation should just be executed once on startup and not on every reload
@@ -164,9 +170,12 @@ Singleton {
 
       // wallpaper
       property JsonObject wallpaper: JsonObject {
+        property bool enabled: true
         property string directory: "/usr/share/wallpapers"
         property bool enableMultiMonitorDirectories: false
         property bool setWallpaperOnAllMonitors: true
+        property string fillMode: "crop"
+        property color fillColor: "#000000"
         property bool randomEnabled: false
         property int randomIntervalSec: 300 // 5 min
         property int transitionDuration: 1500 // 1500 ms
@@ -178,7 +187,7 @@ Singleton {
       // applauncher
       property JsonObject appLauncher: JsonObject {
         // When disabled, Launcher hides clipboard command and ignores cliphist
-        property bool enableClipboardHistory: true
+        property bool enableClipboardHistory: false
         // Position: center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
         property string position: "center"
         property real backgroundOpacity: 1.0
@@ -247,6 +256,7 @@ Singleton {
         property bool foot: false
         property bool fuzzel: false
         property bool vesktop: false
+        property bool enableUserTemplates: false
       }
 
       // night light

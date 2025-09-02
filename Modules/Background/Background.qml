@@ -12,13 +12,12 @@ Variants {
 
     required property ShellScreen modelData
 
-    active: Settings.isLoaded && modelData
+    active: Settings.isLoaded && modelData && Settings.data.wallpaper.enabled
 
     sourceComponent: PanelWindow {
       id: root
 
       // Internal state management
-      property bool firstWallpaper: true
       property string transitionType: "fade"
       property real transitionProgress: 0
 
@@ -37,17 +36,41 @@ Variants {
       property real stripesCount: 16
       property real stripesAngle: 0
 
-      // External state management
-      property string servicedWallpaper: modelData ? WallpaperService.getWallpaper(modelData.name) : ""
+      // Used to debounce wallpaper changes
       property string futureWallpaper: ""
-      onServicedWallpaperChanged: {
-        // Set wallpaper immediately on startup
-        if (firstWallpaper) {
-          firstWallpaper = false
-          setWallpaperImmediate(servicedWallpaper)
-        } else {
-          futureWallpaper = servicedWallpaper
-          debounceTimer.restart()
+
+      // Fillmode default is "crop"
+      property real fillMode: 1.0
+      property vector4d fillColor: Qt.vector4d(Settings.data.wallpaper.fillColor.r,
+                                               Settings.data.wallpaper.fillColor.g,
+                                               Settings.data.wallpaper.fillColor.b, 1.0)
+
+      // On startup assign wallpaper immediately
+      Component.onCompleted: {
+        fillMode = WallpaperService.getFillModeUniform()
+
+        var path = modelData ? WallpaperService.getWallpaper(modelData.name) : ""
+        setWallpaperImmediate(path)
+      }
+
+      Connections {
+        target: Settings.data.wallpaper
+        function onFillModeChanged() {
+          fillMode = WallpaperService.getFillModeUniform()
+        }
+      }
+
+      // External state management
+      Connections {
+        target: WallpaperService
+        function onWallpaperChanged(screenName, path) {
+          if (screenName === modelData.name) {
+
+            // Update wallpaper display
+            // Set wallpaper immediately on startup
+            futureWallpaper = path
+            debounceTimer.restart()
+          }
         }
       }
 
@@ -76,8 +99,6 @@ Variants {
 
       Image {
         id: currentWallpaper
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
         source: ""
         smooth: true
         mipmap: false
@@ -89,8 +110,6 @@ Variants {
 
       Image {
         id: nextWallpaper
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
         source: ""
         smooth: true
         mipmap: false
@@ -108,6 +127,17 @@ Variants {
         property variant source1: currentWallpaper
         property variant source2: nextWallpaper
         property real progress: root.transitionProgress
+
+        // Fill mode properties
+        property real fillMode: root.fillMode
+        property vector4d fillColor: root.fillColor
+        property real imageWidth1: source1.sourceSize.width
+        property real imageHeight1: source1.sourceSize.height
+        property real imageWidth2: source2.sourceSize.width
+        property real imageHeight2: source2.sourceSize.height
+        property real screenWidth: width
+        property real screenHeight: height
+
         fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_fade.frag.qsb")
       }
 
@@ -122,6 +152,16 @@ Variants {
         property real progress: root.transitionProgress
         property real smoothness: root.edgeSmoothness
         property real direction: root.wipeDirection
+
+        // Fill mode properties
+        property real fillMode: root.fillMode
+        property vector4d fillColor: root.fillColor
+        property real imageWidth1: source1.sourceSize.width
+        property real imageHeight1: source1.sourceSize.height
+        property real imageWidth2: source2.sourceSize.width
+        property real imageHeight2: source2.sourceSize.height
+        property real screenWidth: width
+        property real screenHeight: height
 
         fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_wipe.frag.qsb")
       }
@@ -140,6 +180,16 @@ Variants {
         property real centerX: root.discCenterX
         property real centerY: root.discCenterY
 
+        // Fill mode properties
+        property real fillMode: root.fillMode
+        property vector4d fillColor: root.fillColor
+        property real imageWidth1: source1.sourceSize.width
+        property real imageHeight1: source1.sourceSize.height
+        property real imageWidth2: source2.sourceSize.width
+        property real imageHeight2: source2.sourceSize.height
+        property real screenWidth: width
+        property real screenHeight: height
+
         fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_disc.frag.qsb")
       }
 
@@ -156,6 +206,16 @@ Variants {
         property real aspectRatio: root.width / root.height
         property real stripeCount: root.stripesCount
         property real angle: root.stripesAngle
+
+        // Fill mode properties
+        property real fillMode: root.fillMode
+        property vector4d fillColor: root.fillColor
+        property real imageWidth1: source1.sourceSize.width
+        property real imageHeight1: source1.sourceSize.height
+        property real imageWidth2: source2.sourceSize.width
+        property real imageHeight2: source2.sourceSize.height
+        property real screenWidth: width
+        property real screenHeight: height
 
         fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_stripes.frag.qsb")
       }

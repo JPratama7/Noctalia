@@ -11,10 +11,21 @@ import qs.Widgets
 NPanel {
   id: root
 
-  panelWidth: Math.round(Math.max(screen?.width * 0.4, 1000) * scaling)
-  panelHeight: Math.round(Math.max(screen?.height * 0.75, 800) * scaling)
+  panelWidth: {
+    var w = Math.round(Math.max(screen?.width * 0.4, 1000) * scaling)
+    w = Math.min(w, screen?.width - Style.marginL * 2)
+    return w
+  }
+  panelHeight: {
+    var h = Math.round(Math.max(screen?.height * 0.75, 800) * scaling)
+    h = Math.min(h, screen?.height - Style.barHeight * scaling - Style.marginL * 2)
+    return h
+  }
   panelAnchorHorizontalCenter: true
   panelAnchorVerticalCenter: true
+
+  // Enable keyboard focus for settings panel
+  panelKeyboardFocus: true
 
   // Tabs enumeration, order is NOT relevant
   enum Tab {
@@ -35,6 +46,18 @@ NPanel {
 
   property int requestedTab: SettingsPanel.Tab.General
   property int currentTabIndex: 0
+  property var tabsModel: []
+
+  Connections {
+    target: Settings.data.wallpaper
+    function onEnabledChanged() {
+      updateTabsModel()
+    }
+  }
+
+  Component.onCompleted: {
+    updateTabsModel()
+  }
 
   Component {
     id: generalTab
@@ -91,75 +114,87 @@ NPanel {
   }
 
   // Order *DOES* matter
-  property var tabsModel: [{
-      "id": SettingsPanel.Tab.General,
-      "label": "General",
-      "icon": "tune",
-      "source": generalTab
-    }, {
-      "id": SettingsPanel.Tab.Bar,
-      "label": "Bar",
-      "icon": "web_asset",
-      "source": barTab
-    }, {
-      "id": SettingsPanel.Tab.Launcher,
-      "label": "Launcher",
-      "icon": "apps",
-      "source": launcherTab
-    }, {
-      "id": SettingsPanel.Tab.AudioService,
-      "label": "Audio",
-      "icon": "volume_up",
-      "source": audioTab
-    }, {
-      "id": SettingsPanel.Tab.Display,
-      "label": "Display",
-      "icon": "monitor",
-      "source": displayTab
-    }, {
-      "id": SettingsPanel.Tab.Network,
-      "label": "Network",
-      "icon": "lan",
-      "source": networkTab
-    }, {
-      "id": SettingsPanel.Tab.Brightness,
-      "label": "Brightness",
-      "icon": "brightness_6",
-      "source": brightnessTab
-    }, {
-      "id": SettingsPanel.Tab.TimeWeather,
-      "label": "Time & Weather",
-      "icon": "schedule",
-      "source": timeWeatherTab
-    }, {
-      "id": SettingsPanel.Tab.ColorScheme,
-      "label": "Color Scheme",
-      "icon": "palette",
-      "source": colorSchemeTab
-    }, {
-      "id": SettingsPanel.Tab.Wallpaper,
-      "label": "Wallpaper",
-      "icon": "image",
-      "source": wallpaperTab
-    }, {
-      "id": SettingsPanel.Tab.WallpaperSelector,
-      "label": "Wallpaper Selector",
-      "icon": "wallpaper_slideshow",
-      "source": wallpaperSelectorTab
-    }, {
-      "id": SettingsPanel.Tab.ScreenRecorder,
-      "label": "Screen Recorder",
-      "icon": "videocam",
-      "source": screenRecorderTab
-    }, {
-      "id": SettingsPanel.Tab.About,
-      "label": "About",
-      "icon": "info",
-      "source": aboutTab
-    }]
+  function updateTabsModel() {
+    let newTabs = [{
+                     "id": SettingsPanel.Tab.General,
+                     "label": "General",
+                     "icon": "tune",
+                     "source": generalTab
+                   }, {
+                     "id": SettingsPanel.Tab.Bar,
+                     "label": "Bar",
+                     "icon": "web_asset",
+                     "source": barTab
+                   }, {
+                     "id": SettingsPanel.Tab.Launcher,
+                     "label": "Launcher",
+                     "icon": "apps",
+                     "source": launcherTab
+                   }, {
+                     "id": SettingsPanel.Tab.AudioService,
+                     "label": "Audio",
+                     "icon": "volume_up",
+                     "source": audioTab
+                   }, {
+                     "id": SettingsPanel.Tab.Display,
+                     "label": "Display",
+                     "icon": "monitor",
+                     "source": displayTab
+                   }, {
+                     "id": SettingsPanel.Tab.Network,
+                     "label": "Network",
+                     "icon": "lan",
+                     "source": networkTab
+                   }, {
+                     "id": SettingsPanel.Tab.Brightness,
+                     "label": "Brightness",
+                     "icon": "brightness_6",
+                     "source": brightnessTab
+                   }, {
+                     "id": SettingsPanel.Tab.TimeWeather,
+                     "label": "Time & Weather",
+                     "icon": "schedule",
+                     "source": timeWeatherTab
+                   }, {
+                     "id": SettingsPanel.Tab.ColorScheme,
+                     "label": "Color Scheme",
+                     "icon": "palette",
+                     "source": colorSchemeTab
+                   }, {
+                     "id": SettingsPanel.Tab.Wallpaper,
+                     "label": "Wallpaper",
+                     "icon": "image",
+                     "source": wallpaperTab
+                   }]
 
+    // Only add the Wallpaper Selector tab if the feature is enabled
+    if (Settings.data.wallpaper.enabled) {
+      newTabs.push({
+                     "id": SettingsPanel.Tab.WallpaperSelector,
+                     "label": "Wallpaper Selector",
+                     "icon": "wallpaper_slideshow",
+                     "source": wallpaperSelectorTab
+                   })
+    }
+
+    newTabs.push({
+                   "id": SettingsPanel.Tab.ScreenRecorder,
+                   "label": "Screen Recorder",
+                   "icon": "videocam",
+                   "source": screenRecorderTab
+                 }, {
+                   "id": SettingsPanel.Tab.About,
+                   "label": "About",
+                   "icon": "info",
+                   "source": aboutTab
+                 })
+
+    root.tabsModel = newTabs // Assign the generated list to the model
+  }
   // When the panel opens, choose the appropriate tab
   onOpened: {
+    updateTabsModel()
+
     var initialIndex = SettingsPanel.Tab.General
     if (root.requestedTab !== null) {
       for (var i = 0; i < root.tabsModel.length; i++) {

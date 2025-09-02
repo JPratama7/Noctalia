@@ -14,10 +14,12 @@ ColumnLayout {
   property int inputMaxWidth: 420 * scaling
   property color labelColor: Color.mOnSurface
   property color descriptionColor: Color.mOnSurfaceVariant
+  property string fontFamily: Settings.data.ui.fontDefault
 
   property alias text: input.text
   property alias placeholderText: input.placeholderText
   property alias inputMethodHints: input.inputMethodHints
+  property alias inputItem: input
 
   signal editingFinished
 
@@ -74,6 +76,7 @@ ColumnLayout {
         color: Color.mOnSurface
         placeholderTextColor: Color.mOnSurfaceVariant
         background: null
+        font.family: fontFamily
         font.pointSize: Style.fontSizeS * scaling
         onEditingFinished: root.editingFinished()
       }

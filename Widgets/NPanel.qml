@@ -11,7 +11,16 @@ Loader {
   asynchronous: true
 
   property ShellScreen screen
-  readonly property real scaling: screen ? ScalingService.scale(screen) : 1.0
+  property real scaling: ScalingService.getScreenScale(screen)
+
+  Connections {
+    target: ScalingService
+    function onScaleChanged(screenName, scale) {
+      if ((screen !== null) && (screenName === screen.name)) {
+        scaling = scale
+      }
+    }
+  }
 
   property Component panelContent: null
   property int panelWidth: 1500
@@ -30,6 +39,9 @@ Loader {
   property point buttonPosition: Qt.point(0, 0)
   property int buttonWidth: 0
   property int buttonHeight: 0
+
+  // Whether this panel should accept keyboard focus
+  property bool panelKeyboardFocus: false
 
   // Animation properties
   readonly property real originalScale: 0.7
@@ -139,7 +151,7 @@ Loader {
 
       WlrLayershell.exclusionMode: ExclusionMode.Ignore
       WlrLayershell.namespace: "noctalia-panel"
-      WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+      WlrLayershell.keyboardFocus: root.panelKeyboardFocus ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
       Behavior on color {
         ColorAnimation {
