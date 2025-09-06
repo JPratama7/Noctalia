@@ -52,6 +52,8 @@ Loader {
   property alias isClosing: hideTimer.running
   readonly property real barHeight: Math.round(Style.barHeight * scaling)
   readonly property bool barAtBottom: Settings.data.bar.position === "bottom"
+  readonly property bool barIsVisible: (screen !== null) && (Settings.data.bar.monitors.includes(screen.name)
+                                                             || (Settings.data.bar.monitors.length === 0))
 
   signal opened
   signal closed
@@ -87,7 +89,7 @@ Loader {
       screen = aScreen
     }
 
-    // Get t button position if provided
+    // Get the button position if provided
     if (buttonItem !== undefined && buttonItem !== null) {
       useButtonPosition = true
 
@@ -124,6 +126,7 @@ Loader {
     root.closed()
     active = false
     useButtonPosition = false // Reset button position usage
+    PanelService.closedPanel(root)
   }
 
   // -----------------------------------------
@@ -145,9 +148,8 @@ Loader {
       visible: true
 
       // Dim desktop if required
-      color: (root.active && !root.isClosing && Settings.data.general.dimDesktop) ? Color.applyOpacity(
-                                                                                      Color.mShadow,
-                                                                                      "BB") : Color.transparent
+      color: (root.active && !root.isClosing
+              && Settings.data.general.dimDesktop) ? Qt.alpha(Color.mShadow, Style.opacityHeavy) : Color.transparent
 
       WlrLayershell.exclusionMode: ExclusionMode.Ignore
       WlrLayershell.namespace: "noctalia-panel"
@@ -163,8 +165,8 @@ Loader {
       anchors.left: true
       anchors.right: true
       anchors.bottom: true
-      margins.top: !barAtBottom ? barHeight : 0
-      margins.bottom: barAtBottom ? barHeight : 0
+      margins.top: (barIsVisible && !barAtBottom) ? barHeight : 0
+      margins.bottom: (barIsVisible && barAtBottom) ? barHeight : 0
 
       // Close any panel with Esc without requiring focus
       Shortcut {
@@ -186,7 +188,6 @@ Loader {
         radius: Style.radiusL * scaling
         border.color: Color.mOutline
         border.width: Math.max(1, Style.borderS * scaling)
-        layer.enabled: true
         width: panelWidth
         height: panelHeight
 
@@ -205,31 +206,29 @@ Loader {
             var maxX = panelWindow.width - panelWidth - (Style.marginS * scaling)
             var minX = Style.marginS * scaling
 
-            return Math.max(minX, Math.min(targetX, maxX))
+            return Math.round(Math.max(minX, Math.min(targetX, maxX)))
           } else if (!panelAnchorHorizontalCenter && panelAnchorLeft) {
-            return Style.marginS * scaling
+            return Math.round(marginS * scaling)
           } else if (!panelAnchorHorizontalCenter && panelAnchorRight) {
-            return panelWindow.width - panelWidth - (Style.marginS * scaling)
+            return Math.round(panelWindow.width - panelWidth - (Style.marginS * scaling))
           } else {
-            return (panelWindow.width - panelWidth) / 2
+            return Math.round((panelWindow.width - panelWidth) / 2)
           }
         }
 
         property int calculatedY: {
           if (panelAnchorVerticalCenter) {
-            return (panelWindow.height - panelHeight) / 2
+            return Math.round((panelWindow.height - panelHeight) / 2)
           } else if (panelAnchorBottom) {
-            return panelWindow.height - panelHeight - (Style.marginS * scaling)
+            return Math.round(panelWindow.height - panelHeight - (Style.marginS * scaling))
           } else if (panelAnchorTop) {
-            return (Style.marginS * scaling)
-          } else if (panelAnchorBottom) {
-            panelWindow.height - panelHeight - (Style.marginS * scaling)
+            return Math.round(Style.marginS * scaling)
           } else if (!barAtBottom) {
             // Below the top bar
-            return Style.marginS * scaling
+            return Math.round(Style.marginS * scaling)
           } else {
             // Above the bottom bar
-            return panelWindow.height - panelHeight - (Style.marginS * scaling)
+            return Math.round(panelWindow.height - panelHeight - (Style.marginS * scaling))
           }
         }
 

@@ -7,7 +7,7 @@ import qs.Commons
 import qs.Services
 import qs.Widgets
 
-Row {
+RowLayout {
   id: root
 
   property ShellScreen screen
@@ -15,10 +15,10 @@ Row {
   readonly property real minWidth: 160
   readonly property real maxWidth: 400
 
-  anchors.verticalCenter: parent.verticalCenter
+  Layout.alignment: Qt.AlignVCenter
   spacing: Style.marginS * scaling
   visible: MediaService.currentPlayer !== null && MediaService.canPlay
-  width: MediaService.currentPlayer !== null && MediaService.canPlay ? implicitWidth : 0
+  Layout.preferredWidth: MediaService.currentPlayer !== null && MediaService.canPlay ? implicitWidth : 0
 
   function getTitle() {
     return MediaService.trackTitle + (MediaService.trackArtist !== "" ? ` - ${MediaService.trackArtist}` : "")
@@ -35,14 +35,12 @@ Row {
   Rectangle {
     id: mediaMini
 
-    // Let the Rectangle size itself based on its content (the Row)
-    width: row.width + Style.marginM * 2 * scaling
+    Layout.preferredWidth: rowLayout.implicitWidth + Style.marginM * 2 * scaling
+    Layout.preferredHeight: Math.round(Style.capsuleHeight * scaling)
+    Layout.alignment: Qt.AlignVCenter
 
-    height: Math.round(Style.capsuleHeight * scaling)
     radius: Math.round(Style.radiusM * scaling)
     color: Color.mSurfaceVariant
-
-    anchors.verticalCenter: parent.verticalCenter
 
     // Used to anchor the tooltip, so the tooltip does not move when the content expands
     Item {
@@ -61,7 +59,7 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "linear"
-                && MediaService.isPlaying && MediaService.trackLength > 0
+                && MediaService.isPlaying
         z: 0
 
         sourceComponent: LinearSpectrum {
@@ -71,42 +69,42 @@ Row {
           fillColor: Color.mOnSurfaceVariant
           opacity: 0.4
         }
+      }
 
-        Loader {
-          anchors.verticalCenter: parent.verticalCenter
-          anchors.horizontalCenter: parent.horizontalCenter
-          active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "mirrored"
-                  && MediaService.isPlaying && MediaService.trackLength > 0
-          z: 0
+      Loader {
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "mirrored"
+                && MediaService.isPlaying
+        z: 0
 
-          sourceComponent: MirroredSpectrum {
-            width: mainContainer.width - Style.marginS * scaling
-            height: mainContainer.height - Style.marginS * scaling
-            values: CavaService.values
-            fillColor: Color.mOnSurfaceVariant
-            opacity: 0.4
-          }
-        }
-
-        Loader {
-          anchors.verticalCenter: parent.verticalCenter
-          anchors.horizontalCenter: parent.horizontalCenter
-          active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "wave"
-                  && MediaService.isPlaying && MediaService.trackLength > 0
-          z: 0
-
-          sourceComponent: WaveSpectrum {
-            width: mainContainer.width - Style.marginS * scaling
-            height: mainContainer.height - Style.marginS * scaling
-            values: CavaService.values
-            fillColor: Color.mOnSurfaceVariant
-            opacity: 0.4
-          }
+        sourceComponent: MirroredSpectrum {
+          width: mainContainer.width - Style.marginS * scaling
+          height: mainContainer.height - Style.marginS * scaling
+          values: CavaService.values
+          fillColor: Color.mOnSurfaceVariant
+          opacity: 0.4
         }
       }
 
-      Row {
-        id: row
+      Loader {
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "wave"
+                && MediaService.isPlaying
+        z: 0
+
+        sourceComponent: WaveSpectrum {
+          width: mainContainer.width - Style.marginS * scaling
+          height: mainContainer.height - Style.marginS * scaling
+          values: CavaService.values
+          fillColor: Color.mOnSurfaceVariant
+          opacity: 0.4
+        }
+      }
+
+      RowLayout {
+        id: rowLayout
         anchors.verticalCenter: parent.verticalCenter
         spacing: Style.marginS * scaling
         z: 1 // Above the visualizer
@@ -116,17 +114,18 @@ Row {
           text: MediaService.isPlaying ? "pause" : "play_arrow"
           font.pointSize: Style.fontSizeL * scaling
           verticalAlignment: Text.AlignVCenter
-          anchors.verticalCenter: parent.verticalCenter
+          Layout.alignment: Qt.AlignVCenter
           visible: !Settings.data.audio.showMiniplayerAlbumArt && getTitle() !== "" && !trackArt.visible
         }
 
-        Column {
-          anchors.verticalCenter: parent.verticalCenter
+        ColumnLayout {
+          Layout.alignment: Qt.AlignVCenter
           visible: Settings.data.audio.showMiniplayerAlbumArt
+          spacing: 0
 
           Item {
-            width: Math.round(18 * scaling)
-            height: Math.round(18 * scaling)
+            Layout.preferredWidth: Math.round(18 * scaling)
+            Layout.preferredHeight: Math.round(18 * scaling)
 
             NImageCircled {
               id: trackArt
@@ -142,23 +141,23 @@ Row {
         NText {
           id: titleText
 
-          // For short titles, show full. For long titles, truncate and expand on hover
-          width: {
+          Layout.preferredWidth: {
             if (mouseArea.containsMouse) {
               return Math.round(Math.min(fullTitleMetrics.contentWidth, root.maxWidth * scaling))
             } else {
               return Math.round(Math.min(fullTitleMetrics.contentWidth, root.minWidth * scaling))
             }
           }
+          Layout.alignment: Qt.AlignVCenter
+
           text: getTitle()
           font.pointSize: Style.fontSizeS * scaling
           font.weight: Style.fontWeightMedium
           elide: Text.ElideRight
-          anchors.verticalCenter: parent.verticalCenter
           verticalAlignment: Text.AlignVCenter
           color: Color.mTertiary
 
-          Behavior on width {
+          Behavior on Layout.preferredWidth {
             NumberAnimation {
               duration: Style.animationSlow
               easing.type: Easing.InOutCubic
@@ -205,10 +204,10 @@ Row {
     text: {
       var str = ""
       if (MediaService.canGoNext) {
-        str += "Right click for next\n"
+        str += "Right click for next.\n"
       }
       if (MediaService.canGoPrevious) {
-        str += "Middle click for previous\n"
+        str += "Middle click for previous."
       }
       return str
     }

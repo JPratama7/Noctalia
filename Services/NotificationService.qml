@@ -7,7 +7,7 @@ import qs.Commons
 import qs.Services
 import Quickshell.Services.Notifications
 
-QtObject {
+Singleton {
   id: root
 
   // Notification server instance
@@ -28,11 +28,11 @@ QtObject {
 
     // Signal when notification is received
     onNotification: function (notification) {
+      // Always add notification to history
+      root.addToHistory(notification)
 
-      // Check if notifications are suppressed
-      if (Settings.data.notifications && Settings.data.notifications.suppressed) {
-        // Still add to history but don't show notification
-        root.addToHistory(notification)
+      // Check if do-not-disturb is enabled
+      if (Settings.data.notifications && Settings.data.notifications.doNotDisturb) {
         return
       }
 
@@ -46,8 +46,6 @@ QtObject {
 
       // Add to our model
       root.addNotification(notification)
-      // Also add to history
-      root.addToHistory(notification)
     }
   }
 
@@ -109,6 +107,15 @@ QtObject {
     }
   }
 
+  Connections {
+    target: Settings.data.notifications
+    function onDoNotDisturbChanged() {
+      const label = Settings.data.notifications.doNotDisturb ? "'Do Not Disturb' enabled" : "'Do Not Disturb' disabled"
+      const description = Settings.data.notifications.doNotDisturb ? "You'll find these notifications in your history." : "Showing all notifications."
+      ToastService.showNotice(label, description)
+    }
+  }
+
   // Function to add notification to model
   function addNotification(notification) {
     notificationModel.insert(0, {
@@ -116,6 +123,8 @@ QtObject {
                                "summary": notification.summary,
                                "body": notification.body,
                                "appName": notification.appName,
+                               "image": notification.image,
+                               "appIcon": notification.appIcon,
                                "urgency": notification.urgency,
                                "timestamp": new Date()
                              })

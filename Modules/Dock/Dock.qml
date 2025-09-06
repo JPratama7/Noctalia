@@ -32,30 +32,43 @@ Variants {
 
       screen: modelData
 
-      // Auto-hide properties - make reactive to settings changes
-      property bool autoHide: Settings.data.dock.autoHide || (Settings.data.bar.position === "bottom")
+      WlrLayershell.namespace: "noctalia-dock"
+
+      property bool autoHide: Settings.data.dock.autoHide
       property bool hidden: autoHide
       property int hideDelay: 500
       property int showDelay: 100
       property int hideAnimationDuration: Style.animationFast
       property int showAnimationDuration: Style.animationFast
-      property int peekHeight: 2
+      property int peekHeight: 7 * scaling
       property int fullHeight: dockContainer.height
       property int iconSize: 36
+
+      // Bar positioning properties
+      property bool barAtBottom: Settings.data.bar.position === "bottom"
+      property int barHeight: barAtBottom ? (Settings.data.bar.height || 30) * scaling : 0
+      property int dockSpacing: 4 * scaling // Space between dock and bar
 
       // Track hover state
       property bool dockHovered: false
       property bool anyAppHovered: false
 
-      // Dock is only shown if explicitely toggled
-      exclusionMode: ExclusionMode.Ignore
-
+      // Dock is positioned at the bottom
       anchors.bottom: true
-      anchors.left: true
-      anchors.right: true
+
+      // Dock should be above bar but not create its own exclusion zone
+      exclusionMode: ExclusionMode.Ignore
       focusable: false
+
+      // Make the window transparent
       color: Color.transparent
-      implicitHeight: iconSize * 1.4 * scaling
+
+      // Set the window size - always include space for peek area when auto-hide is enabled
+      implicitWidth: dockContainer.width
+      implicitHeight: fullHeight + (barAtBottom ? barHeight + dockSpacing : 0)
+
+      // Position the entire window above the bar when bar is at bottom
+      margins.bottom: barAtBottom ? barHeight : 0
 
       // Watch for autoHide setting changes
       onAutoHideChanged: {
@@ -75,7 +88,7 @@ Variants {
         id: hideTimer
         interval: hideDelay
         onTriggered: {
-          if (autoHide && !dockHovered && !anyAppHovered) {
+          if (autoHide && !dockHovered && !anyAppHovered && !peekArea.containsMouse) {
             hidden = true
           }
         }
@@ -85,76 +98,87 @@ Variants {
       Timer {
         id: showTimer
         interval: showDelay
-        onTriggered: hidden = false
-      }
-
-      // Behavior for smooth hide/show animations
-      Behavior on margins.bottom {
-        NumberAnimation {
-          duration: hidden ? hideAnimationDuration : showAnimationDuration
-          easing.type: Easing.InOutQuad
+        onTriggered: {
+          if (autoHide) {
+            hidden = false
+          }
         }
       }
 
+      // Peek area that remains visible when dock is hidden
       MouseArea {
-        id: screenEdgeMouseArea
-        x: 0
-        y: modelData && modelData.geometry ? modelData.geometry.height - (fullHeight + 10 * scaling) : 0
-        width: screen.width
-        height: fullHeight + 10 * scaling
-        hoverEnabled: true
-        propagateComposedEvents: true
+        id: peekArea
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: peekHeight + dockSpacing
+        hoverEnabled: autoHide
+        visible: autoHide
 
         onEntered: {
           if (autoHide && hidden) {
             showTimer.start()
           }
         }
+
         onExited: {
           if (autoHide && !hidden && !dockHovered && !anyAppHovered) {
-            hideTimer.start()
+            hideTimer.restart()
           }
         }
       }
 
-      margins.bottom: hidden ? -(fullHeight - peekHeight) : 0
-
       Rectangle {
         id: dockContainer
-        width: dock.width + 48 * scaling
+        width: dockLayout.implicitWidth + 48 * scaling
         height: iconSize * 1.4 * scaling
-        color: Color.mSurface
+        color: Qt.alpha(Color.mSurface, Settings.data.dock.backgroundOpacity)
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: dockSpacing
         topLeftRadius: Style.radiusL * scaling
         topRightRadius: Style.radiusL * scaling
+
+        // Animate the dock sliding up and down
+        transform: Translate {
+          y: hidden ? (fullHeight - peekHeight) : 0
+
+          Behavior on y {
+            NumberAnimation {
+              duration: hidden ? hideAnimationDuration : showAnimationDuration
+              easing.type: Easing.InOutQuad
+            }
+          }
+        }
 
         MouseArea {
           id: dockMouseArea
           anchors.fill: parent
           hoverEnabled: true
-          propagateComposedEvents: true
 
           onEntered: {
             dockHovered = true
             if (autoHide) {
               showTimer.stop()
               hideTimer.stop()
-              hidden = false
+              if (hidden) {
+                hidden = false
+              }
             }
           }
+
           onExited: {
             dockHovered = false
-            // Only start hide timer if we're not hovering over any app
-            if (autoHide && !anyAppHovered) {
-              hideTimer.start()
+            // Only start hide timer if we're not hovering over any app or the peek area
+            if (autoHide && !anyAppHovered && !peekArea.containsMouse) {
+              hideTimer.restart()
             }
           }
         }
 
         Item {
           id: dock
-          width: runningAppsRow.width
+          width: dockLayout.implicitWidth
           height: parent.height - (20 * scaling)
           anchors.centerIn: parent
 
@@ -170,10 +194,10 @@ Variants {
             return Icons.iconForAppId(toplevel.appId?.toLowerCase())
           }
 
-          Row {
-            id: runningAppsRow
+          RowLayout {
+            id: dockLayout
             spacing: Style.marginL * scaling
-            height: parent.height
+            Layout.preferredHeight: parent.height
             anchors.centerIn: parent
 
             Repeater {
@@ -181,8 +205,10 @@ Variants {
 
               delegate: Rectangle {
                 id: appButton
-                width: iconSize * scaling
-                height: iconSize * scaling
+                Layout.preferredWidth: iconSize * scaling
+                Layout.preferredHeight: iconSize * scaling
+                Layout.alignment: Qt.AlignCenter
+
                 color: Color.transparent
                 radius: Style.radiusM * scaling
 
@@ -190,22 +216,6 @@ Variants {
                 property bool hovered: appMouseArea.containsMouse
                 property string appId: modelData ? modelData.appId : ""
                 property string appTitle: modelData ? modelData.title : ""
-
-                // Hover background
-                Rectangle {
-                  id: hoverBackground
-                  anchors.fill: parent
-                  color: appButton.hovered ? Color.mSurfaceVariant : Color.transparent
-                  radius: parent.radius
-                  opacity: appButton.hovered ? 0.8 : 0
-
-                  Behavior on opacity {
-                    NumberAnimation {
-                      duration: Style.animationFast
-                      easing.type: Easing.OutQuad
-                    }
-                  }
-                }
 
                 // The icon
                 Image {
@@ -265,16 +275,18 @@ Variants {
                     if (autoHide) {
                       showTimer.stop()
                       hideTimer.stop()
-                      hidden = false
+                      if (hidden) {
+                        hidden = false
+                      }
                     }
                   }
 
                   onExited: {
                     anyAppHovered = false
                     appTooltip.hide()
-                    // Only start hide timer if we're not hovering over the dock
-                    if (autoHide && !dockHovered) {
-                      hideTimer.start()
+                    // Only start hide timer if we're not hovering over the dock or peek area
+                    if (autoHide && !dockHovered && !peekArea.containsMouse) {
+                      hideTimer.restart()
                     }
                   }
 
@@ -290,7 +302,7 @@ Variants {
 
                 Rectangle {
                   visible: isActive
-                  width: iconSize * 0.75
+                  width: iconSize * 0.25
                   height: 4 * scaling
                   color: Color.mPrimary
                   radius: Style.radiusXS

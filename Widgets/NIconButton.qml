@@ -15,7 +15,6 @@ Rectangle {
   property string tooltipText
   property bool enabled: true
   property bool hovering: false
-  property real fontPointSize: Style.fontSizeM
 
   property color colorBg: Color.mSurfaceVariant
   property color colorFg: Color.mPrimary
@@ -28,6 +27,7 @@ Rectangle {
   signal exited
   signal clicked
   signal rightClicked
+  signal middleClicked
 
   implicitWidth: size
   implicitHeight: size
@@ -40,7 +40,7 @@ Rectangle {
 
   NIcon {
     text: root.icon
-    font.pointSize: root.fontPointSize * scaling
+    font.pointSize: Style.fontSizeM * scaling
     color: root.hovering ? colorFgHover : colorFg
     // Center horizontally
     x: (root.width - width) / 2
@@ -59,7 +59,7 @@ Rectangle {
     enabled: root.enabled
     anchors.fill: parent
     cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
     hoverEnabled: true
     onEntered: {
       hovering = true
@@ -83,6 +83,8 @@ Rectangle {
         root.clicked()
       } else if (mouse.button === Qt.RightButton) {
         root.rightClicked()
+      } else if (mouse.button === Qt.MiddleButton) {
+        root.middleClicked()
       }
     }
   }

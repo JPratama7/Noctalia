@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -6,7 +7,7 @@ import qs.Commons
 import qs.Services
 import qs.Widgets
 
-Row {
+Item {
   id: root
 
   property ShellScreen screen
@@ -18,12 +19,13 @@ Row {
   // Use the shared service for keyboard layout
   property string currentLayout: KeyboardLayoutService.currentLayout
 
-  width: pill.width
-  height: pill.height
+  implicitWidth: pill.width
+  implicitHeight: pill.height
 
   NPill {
     id: pill
 
+    anchors.verticalCenter: parent.verticalCenter
     rightOpen: BarWidgetRegistry.getNPillDirection(root)
     icon: "keyboard_alt"
     iconCircleColor: Color.mPrimary

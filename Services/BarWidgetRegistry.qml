@@ -16,12 +16,16 @@ Singleton {
                            "Bluetooth": bluetoothComponent,
                            "Brightness": brightnessComponent,
                            "Clock": clockComponent,
+                           "CustomButton": customButtonComponent,
+                           "DarkModeToggle": darkModeToggle,
+                           "KeepAwake": keepAwakeComponent,
                            "KeyboardLayout": keyboardLayoutComponent,
                            "MediaMini": mediaMiniComponent,
                            "Microphone": microphoneComponent,
                            "NightLight": nightLightComponent,
                            "NotificationHistory": notificationHistoryComponent,
                            "PowerProfile": powerProfileComponent,
+                           "PowerToggle": powerToggleComponent,
                            "ScreenRecorderIndicator": screenRecorderIndicatorComponent,
                            "SidePanelToggle": sidePanelToggleComponent,
                            "SystemMonitor": systemMonitorComponent,
@@ -31,6 +35,16 @@ Singleton {
                            "WiFi": wiFiComponent,
                            "Workspace": workspaceComponent
                          })
+
+  property var widgetMetadata: ({
+                                  "CustomButton": {
+                                    "allowUserSettings": true,
+                                    "icon": "favorite",
+                                    "leftClickExec": "",
+                                    "rightClickExec": "",
+                                    "middleClickExec": ""
+                                  }
+                                })
 
   // Component definitions - these are loaded once at startup
   property Component activeWindowComponent: Component {
@@ -51,8 +65,17 @@ Singleton {
   property Component clockComponent: Component {
     Clock {}
   }
+  property Component customButtonComponent: Component {
+    CustomButton {}
+  }
+  property Component darkModeToggle: Component {
+    DarkModeToggle {}
+  }
   property Component keyboardLayoutComponent: Component {
     KeyboardLayout {}
+  }
+  property Component keepAwakeComponent: Component {
+    KeepAwake {}
   }
   property Component mediaMiniComponent: Component {
     MediaMini {}
@@ -68,6 +91,9 @@ Singleton {
   }
   property Component powerProfileComponent: Component {
     PowerProfile {}
+  }
+  property Component powerToggleComponent: Component {
+    PowerToggle {}
   }
   property Component screenRecorderIndicatorComponent: Component {
     ScreenRecorderIndicator {}
@@ -96,18 +122,23 @@ Singleton {
 
   // ------------------------------
   // Helper function to get widget component by name
-  function getWidget(name) {
-    return widgets[name] || null
+  function getWidget(id) {
+    return widgets[id] || null
   }
 
   // Helper function to check if widget exists
-  function hasWidget(name) {
-    return name in widgets
+  function hasWidget(id) {
+    return id in widgets
   }
 
-  // Get list of available widget names
+  // Get list of available widget id
   function getAvailableWidgets() {
     return Object.keys(widgets)
+  }
+
+  // Helper function to check if widget has user settings
+  function widgetHasUserSettings(id) {
+    return (widgetMetadata[id] !== undefined) && (widgetMetadata[id].allowUserSettings === true)
   }
 
   function getNPillDirection(widget) {

@@ -37,7 +37,16 @@ Item {
     // NToast updates its scaling when showing.
     scaling = ScalingService.getScreenScale(screen)
 
+    // Stop any running animations and reset state
+    showAnimation.stop()
+    hideAnimation.stop()
+    autoHideTimer.stop()
+
+    // Ensure we start from the hidden position
+    y = hiddenY
     visible = true
+
+    // Start the show animation
     showAnimation.start()
     if (duration > 0 && !persistent) {
       autoHideTimer.start()
@@ -81,7 +90,6 @@ Item {
 
   // Main toast container
   Rectangle {
-    id: container
     anchors.fill: parent
     radius: Style.radiusL * scaling
 
@@ -100,15 +108,6 @@ Item {
       }
     }
     border.width: Math.max(2, Style.borderM * scaling)
-
-    // Drop shadow effect
-    layer.enabled: true
-    layer.effect: MultiEffect {
-      shadowEnabled: true
-      shadowColor: Qt.rgba(0, 0, 0, 0.3)
-      shadowBlur: 20 * scaling
-      shadowVerticalOffset: 4 * scaling
-    }
 
     RowLayout {
       id: contentLayout
@@ -146,43 +145,41 @@ Item {
       }
 
       // Label and description
-      Column {
-        id: textColumn
+      ColumnLayout {
         spacing: Style.marginXXS * scaling
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
 
         NText {
-          id: labelText
+          Layout.fillWidth: true
           text: root.label
           color: Color.mOnSurface
           font.pointSize: Style.fontSizeM * scaling
           font.weight: Style.fontWeightBold
           wrapMode: Text.WordWrap
-          width: parent.width
           visible: text.length > 0
         }
 
         NText {
-          id: descriptionText
+          Layout.fillWidth: true
           text: root.description
           color: Color.mOnSurface
           font.pointSize: Style.fontSizeM * scaling
           wrapMode: Text.WordWrap
-          width: parent.width
           visible: text.length > 0
         }
       }
 
       // Close button (only if persistent or manual dismiss needed)
       NIconButton {
-        id: closeButton
         icon: "close"
         visible: root.persistent || root.duration === 0
 
-        color: Color.mOnSurface
+        colorBg: Color.mSurfaceVariant
+        colorFg: Color.mOnSurface
+        colorBorder: Color.transparent
+        colorBorderHover: Color.mOutline
 
-        fontPointSize: Style.fontSizeM * scaling
         sizeRatio: 0.8
         Layout.alignment: Qt.AlignTop
 

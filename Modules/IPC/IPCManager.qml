@@ -1,11 +1,23 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import qs.Commons
 import qs.Services
 
 Item {
   id: root
+
+  // Using Wayland protocols to get focused window then determine which screen it's on.
+  function getActiveScreen() {
+    const activeWindow = ToplevelManager.activeToplevel
+    if (activeWindow && activeWindow.screens.length > 0) {
+      return activeWindow.screens[0]
+    }
+
+    // Fall back to the primary screen
+    return Quickshell.screens[0]
+  }
 
   IpcHandler {
     target: "screenRecorder"
@@ -17,16 +29,17 @@ Item {
   IpcHandler {
     target: "settings"
     function toggle() {
-      settingsPanel.toggle(Quickshell.screens[0])
+      settingsPanel.toggle(getActiveScreen())
     }
   }
 
   IpcHandler {
     target: "notifications"
     function toggleHistory() {
-      notificationHistoryPanel.toggle(Quickshell.screens[0])
+      notificationHistoryPanel.toggle(getActiveScreen())
     }
-    function toggleDoNotDisturb() {// TODO
+    function toggleDND() {
+      Settings.data.notifications.doNotDisturb = !Settings.data.notifications.doNotDisturb
     }
   }
 
@@ -38,44 +51,17 @@ Item {
   }
 
   IpcHandler {
-    target: "appLauncher"
-    function toggle() {
-      launcherPanel.toggle(Quickshell.screens[0])
-    }
-    function clipboard() {
-      launcherPanel.toggle(Quickshell.screens[0])
-      // Use the setSearchText function to set clipboard mode
-      Qt.callLater(() => {
-                     launcherPanel.setSearchText(">clip ")
-                   })
-    }
-    function calculator() {
-      launcherPanel.toggle(Quickshell.screens[0])
-      // Use the setSearchText function to set calculator mode
-      Qt.callLater(() => {
-                     launcherPanel.setSearchText(">calc ")
-                   })
-    }
-  }
-
-  IpcHandler {
     target: "launcher"
     function toggle() {
-      launcherPanel.toggle(Quickshell.screens[0])
+      launcherPanel.toggle(getActiveScreen())
     }
     function clipboard() {
-      launcherPanel.toggle(Quickshell.screens[0])
-      // Use the setSearchText function to set clipboard mode
-      Qt.callLater(() => {
-                     launcherPanel.setSearchText(">clip ")
-                   })
+      launcherPanel.setSearchText(">clip ")
+      launcherPanel.toggle(getActiveScreen())
     }
     function calculator() {
-      launcherPanel.toggle(Quickshell.screens[0])
-      // Use the setSearchText function to set calculator mode
-      Qt.callLater(() => {
-                     launcherPanel.setSearchText(">calc ")
-                   })
+      launcherPanel.setSearchText(">calc ")
+      launcherPanel.toggle(getActiveScreen())
     }
   }
 
@@ -101,6 +87,19 @@ Item {
   }
 
   IpcHandler {
+    target: "darkMode"
+    function toggle() {
+      Settings.data.colorSchemes.darkMode = !Settings.data.colorSchemes.darkMode
+    }
+    function setDark() {
+      Settings.data.colorSchemes.darkMode = true
+    }
+    function setLight() {
+      Settings.data.colorSchemes.darkMode = false
+    }
+  }
+
+  IpcHandler {
     target: "volume"
     function increase() {
       AudioService.increaseVolume()
@@ -121,14 +120,14 @@ Item {
   IpcHandler {
     target: "powerPanel"
     function toggle() {
-      powerPanel.toggle(Quickshell.screens[0])
+      powerPanel.toggle(getActiveScreen())
     }
   }
 
   IpcHandler {
     target: "sidePanel"
     function toggle() {
-      sidePanel.toggle(Quickshell.screens[0])
+      sidePanel.toggle(getActiveScreen())
     }
   }
 
@@ -139,6 +138,13 @@ Item {
       if (Settings.data.wallpaper.enabled) {
         WallpaperService.setRandomWallpaper()
       }
+    }
+
+    function set(path: string, screen: string) {
+      if (screen === "all" || screen === "") {
+        screen = undefined
+      }
+      WallpaperService.changeWallpaper(path, screen)
     }
   }
 }

@@ -51,7 +51,7 @@ Features a modern modular architecture with a status bar, notification system, c
 - **Lock Screen:** Secure lock experience with PAM authentication, time display, and animated background.
 - **Audio Integration:** Volume controls, media playback, and audio visualizer (cava-based).
 - **Connectivity:** WiFi and Bluetooth management with device pairing and network status.
-- **Power Management:** Battery monitoring, brightness control, and power profile switching.
+- **Power Management:** Battery monitoring, brightness control, power profile switching, power menu, and idle inhibition.
 - **System Monitoring:** CPU, memory, and network usage monitoring with visual indicators.
 - **Tray System:** Application tray with menu support and system integration.
 - **Background Management:** Wallpaper management with effects and dynamic theming support.
@@ -191,60 +191,36 @@ Alternatively, you can add it to your NixOS configuration or flake:
 
 ### Usage
 
-<details>
-<summary> Nix </summary>
-The following commands apply to the Nix flake installation.
+`noctalia-shell` offers many IPC calls for your convenience, so you can add them to your favorite keybinds or scripts.
 
-| Action                      | Command                                               |
-| --------------------------- | ----------------------------------------------------- |
-| Start the Shell             | `noctalia-shell`                                      |
-| Toggle Application Launcher | `noctalia-shell ipc call launcher toggle`             |
-| Toggle Side Panel           | `noctalia-shell ipc call sidePanel toggle`            |
-| Open Clipboard History      | `noctalia-shell ipc call launcher clipboard`          |
-| Open Calculator             | `noctalia-shell ipc call launcher calculator`         |
-| Increase Brightness         | `noctalia-shell ipc call brightness increase`         |
-| Decrease Brightness         | `noctalia-shell ipc call brightness decrease`         |
-| Increase Output Volume      | `noctalia-shell ipc call volume increase`             |
-| Decrease Output Volume      | `noctalia-shell ipc call volume decrease`             |
-| Toggle Mute Audio Output    | `noctalia-shell ipc call volume muteOutput`           |
-| Toggle Mute Audio Input     | `noctalia-shell ipc call volume muteInput`            |
-| Toggle Power Panel          | `noctalia-shell ipc call powerPanel toggle`           |
-| Toggle Idle Inhibitor       | `noctalia-shell ipc call idleInhibitor toggle`        |
-| Toggle Settings Window      | `noctalia-shell ipc call settings toggle`             |
-| Toggle Lock Screen          | `noctalia-shell ipc call lockScreen toggle`           |
-| Toggle Notification History | `noctalia-shell ipc call notifications toggleHistory` |
-| Select new random wallpaper | `noctalia-shell ipc call wallpaper random`            |
+*If you're using the Flake installation on NixOS, replace `qs -c noctalia-shell` with `noctalia-shell`*
 
-</details>
+*If you're using the manual install (`git clone...` and have it in `~/.config/quickshell/`) you can just use `qs ipc call...`*
 
-
-<details>
-<summary> AUR/Manual install </summary>
-
-The following commands apply to both AUR package and manual installation.
-
-| Action                      | Command                                                     |
-| --------------------------- | ----------------------------------------------------------- |
-| Start the Shell             | `qs -c noctalia-shell`                                      |
-| Toggle Application Launcher | `qs -c noctalia-shell ipc call launcher toggle`             |
-| Toggle Side Panel           | `qs -c noctalia-shell ipc call sidePanel toggle`            |
-| Open Clipboard History      | `qs -c noctalia-shell ipc call launcher clipboard`          |
-| Open Calculator             | `qs -c noctalia-shell ipc call launcher calculator`         |
-| Increase Brightness         | `qs -c noctalia-shell ipc call brightness increase`         |
-| Decrease Brightness         | `qs -c noctalia-shell ipc call brightness decrease`         |
-| Increase Output Volume      | `qs -c noctalia-shell ipc call volume increase`             |
-| Decrease Output Volume      | `qs -c noctalia-shell ipc call volume decrease`             |
-| Toggle Mute Audio Output    | `qs -c noctalia-shell ipc call volume muteOutput`           |
-| Toggle Mute Audio Input     | `qs -c noctalia-shell ipc call volume muteInput`            |
-| Toggle Power Panel          | `qs -c noctalia-shell ipc call powerPanel toggle`           |
-| Toggle Idle Inhibitor       | `qs -c noctalia-shell ipc call idleInhibitor toggle`        |
-| Toggle Settings Window      | `qs -c noctalia-shell ipc call settings toggle`             |
-| Toggle Lock Screen          | `qs -c noctalia-shell ipc call lockScreen toggle`           |
-| Toggle Notification History | `qs -c noctalia-shell ipc call notifications toggleHistory` |
-| Select new random wallpaper | `qs -c noctalia-shell ipc call wallpaper random`            |
-
-</details>
-
+| Action                      | Command*                                                       |
+| --------------------------- | -------------------------------------------------------------- |
+| Start the Shell             | `qs -c noctalia-shell`                                         |
+| Toggle Application Launcher | `qs -c noctalia-shell ipc call launcher toggle`                |
+| Toggle Side Panel           | `qs -c noctalia-shell ipc call sidePanel toggle`               |
+| Open Clipboard History      | `qs -c noctalia-shell ipc call launcher clipboard`             |
+| Open Calculator             | `qs -c noctalia-shell ipc call launcher calculator`            |
+| Increase Brightness         | `qs -c noctalia-shell ipc call brightness increase`            |
+| Decrease Brightness         | `qs -c noctalia-shell ipc call brightness decrease`            |
+| Increase Output Volume      | `qs -c noctalia-shell ipc call volume increase`                |
+| Decrease Output Volume      | `qs -c noctalia-shell ipc call volume decrease`                |
+| Toggle Mute Audio Output    | `qs -c noctalia-shell ipc call volume muteOutput`              |
+| Toggle Mute Audio Input     | `qs -c noctalia-shell ipc call volume muteInput`               |
+| Toggle Power Panel          | `qs -c noctalia-shell ipc call powerPanel toggle`              |
+| Toggle Idle Inhibitor       | `qs -c noctalia-shell ipc call idleInhibitor toggle`           |
+| Toggle Settings Window      | `qs -c noctalia-shell ipc call settings toggle`                |
+| Toggle Lock Screen          | `qs -c noctalia-shell ipc call lockScreen toggle`              |
+| Toggle Notification History | `qs -c noctalia-shell ipc call notifications toggleHistory`    |
+| Toggle Notification DND     | `qs -c noctalia-shell ipc call notifications toggleDND`        |
+| Change Wallpaper            | `qs -c noctalia-shell ipc call wallpaper set $path $monitor`   |
+| Assign a Random Wallpaper   | `qs -c noctalia-shell ipc call wallpaper random`               |
+| Toggle Dark Mode            | `qs -c noctalia-shell ipc call darkMode toggle`                |
+| Set Dark Mode               | `qs -c noctalia-shell ipc call darkMode setDark`               |
+| Set Light Mode              | `qs -c noctalia-shell ipc call darkMode setLight`              |
 
 ### Configuration
 
@@ -290,6 +266,10 @@ The launcher supports special commands for enhanced functionality:
 For Niri:
 
 ```
+debug {
+  honor-xdg-activation-with-invalid-serial
+}
+
 window-rule {
     geometry-corner-radius 20
     clip-to-geometry true
@@ -304,6 +284,8 @@ layer-rule {
     place-within-backdrop true
 }
 ```
+`honor-xdg-activation-with-invalid-serial` allows notification actions (like view etc) to work.
+
 
 ---
 
@@ -357,11 +339,13 @@ Special thanks to the creators of [**Caelestia**](https://github.com/caelestia-d
 
 #### Donation
 
-While I actually didn't want to accept donations, more and more people are asking to donate so... I don't know, if you really feel like donating then I obviously highly appreciate it but **PLEASE** never feel forced to donate or anything. It won't change how we work on Noctalia, it's a project that we work on for fun in the end.
+While all donations are greatly appreciated, they are completely voluntary.
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R6R01IX85B)
+<a href="https://ko-fi.com/soramane">
+  <img src="https://img.shields.io/badge/donate-ko--fi-A8AEFF?style=for-the-badge&logo=kofi&logoColor=FFFFFF&labelColor=0C0D11" alt="Ko-Fi" />
+</a>
 
-Thank you to everyone who supports me and this project 💜!
+#### Thank you to everyone who supports the project 💜!
 * Gohma
 * <a href="https://pika-os.com/" target="_blank">PikaOS</a>
 * DiscoCevapi

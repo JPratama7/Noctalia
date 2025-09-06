@@ -13,8 +13,6 @@ NIconButton {
   property ShellScreen screen
   property real scaling: 1.0
 
-  visible: Settings.data.network.wifiEnabled
-
   sizeRatio: 0.8
 
   Component.onCompleted: {
@@ -50,6 +48,6 @@ NIconButton {
       return "signal_wifi_bad"
     }
   }
-  tooltipText: "Network / Wi-Fi"
+  tooltipText: "Network / Wi-Fi."
   onClicked: PanelService.getPanel("wifiPanel")?.toggle(screen, this)
 }

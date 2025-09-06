@@ -22,8 +22,10 @@ Singleton {
 
   property string settingsFile: Quickshell.env("NOCTALIA_SETTINGS_FILE") || (configDir + "settings.json")
 
-  property string defaultWallpaper: Qt.resolvedUrl("../Assets/Tests/wallpaper.png")
   property string defaultAvatar: Quickshell.env("HOME") + "/.face"
+  property string defaultWallpapersDirectory: Quickshell.env("HOME") + "/Pictures/Wallpapers"
+  property string defaultVideosDirectory: Quickshell.env("HOME") + "/Videos"
+  property string defaultLocation: "Tokyo"
 
   // Used to access via Settings.data.xxx.yyy
   readonly property alias data: adapter
@@ -33,6 +35,7 @@ Singleton {
   // Signal emitted when settings are loaded after startupcale changes
   signal settingsLoaded
 
+  // -----------------------------------------------------
   // Function to validate monitor configurations
   function validateMonitorConfigurations() {
     var availableScreenNames = []
@@ -53,16 +56,67 @@ Singleton {
         }
       }
       if (!hasValidBarMonitor) {
-        Logger.log("Settings",
-                   "No configured bar monitors found on system, clearing bar monitor list to show on all screens")
+        Logger.warn("Settings",
+                    "No configured bar monitors found on system, clearing bar monitor list to show on all screens")
         adapter.bar.monitors = []
       } else {
-        Logger.log("Settings", "Found valid bar monitors, keeping configuration")
+
+        //Logger.log("Settings", "Found valid bar monitors, keeping configuration")
       }
     } else {
-      Logger.log("Settings", "Bar monitor list is empty, will show on all available screens")
+
+      //Logger.log("Settings", "Bar monitor list is empty, will show on all available screens")
     }
   }
+
+  // -----------------------------------------------------
+  // If the settings structure has changed, ensure
+  // backward compatibility
+  function upgradeSettingsData() {
+    for (var i = 0; i < adapter.bar.widgets.left.length; i++) {
+      var obj = adapter.bar.widgets.left[i]
+      if (typeof obj === "string") {
+        adapter.bar.widgets.left[i] = {
+          "id": obj
+        }
+      }
+    }
+    for (var i = 0; i < adapter.bar.widgets.center.length; i++) {
+      var obj = adapter.bar.widgets.center[i]
+      if (typeof obj === "string") {
+        adapter.bar.widgets.center[i] = {
+          "id": obj
+        }
+      }
+    }
+    for (var i = 0; i < adapter.bar.widgets.right.length; i++) {
+      var obj = adapter.bar.widgets.right[i]
+      if (typeof obj === "string") {
+        adapter.bar.widgets.right[i] = {
+          "id": obj
+        }
+      }
+    }
+  }
+
+  // -----------------------------------------------------
+  // Kickoff essential services
+  function kickOffServices() {
+    // Ensure our location singleton is created as soon as possible so we start fetching weather asap
+    LocationService.init()
+
+    NightLightService.apply()
+
+    ColorSchemeService.init()
+
+    MatugenService.init()
+
+    FontService.init()
+
+    HooksService.init()
+  }
+
+  // -----------------------------------------------------
   Item {
     Component.onCompleted: {
 
@@ -97,13 +151,14 @@ Singleton {
         Logger.log("Settings", "Settings loaded successfully")
         isLoaded = true
 
+        upgradeSettingsData()
+
+        validateMonitorConfigurations()
+
+        kickOffServices()
+
         // Emit the signal
         root.settingsLoaded()
-
-        Qt.callLater(function () {
-          // Some stuff like settings validation should just be executed once on startup and not on every reload
-          validateMonitorConfigurations()
-        })
       }
     }
     onLoadFailed: function (error) {
@@ -115,6 +170,8 @@ Singleton {
     JsonAdapter {
       id: adapter
 
+      property int settingsVersion: 1
+
       // bar
       property JsonObject bar: JsonObject {
         property string position: "top" // Possible values: "top", "bottom"
@@ -122,15 +179,46 @@ Singleton {
         property bool alwaysShowBatteryPercentage: false
         property bool showNetworkStats: false
         property real backgroundOpacity: 1.0
+        property bool useDistroLogo: false
         property string showWorkspaceLabel: "none"
         property list<string> monitors: []
 
         // Widget configuration for modular bar system
         property JsonObject widgets
         widgets: JsonObject {
-          property list<string> left: ["SystemMonitor", "ActiveWindow", "MediaMini"]
-          property list<string> center: ["Workspace"]
-          property list<string> right: ["ScreenRecorderIndicator", "Tray", "NotificationHistory", "WiFi", "Bluetooth", "Battery", "Volume", "Brightness", "NightLight", "Clock", "SidePanelToggle"]
+          property list<var> left: [{
+              "id": "SystemMonitor"
+            }, {
+              "id": "ActiveWindow"
+            }, {
+              "id": "MediaMini"
+            }]
+          property list<var> center: [{
+              "id": "Workspace"
+            }]
+          property list<var> right: [{
+              "id": "ScreenRecorderIndicator"
+            }, {
+              "id": "Tray"
+            }, {
+              "id": "NotificationHistory"
+            }, {
+              "id": "WiFi"
+            }, {
+              "id": "Bluetooth"
+            }, {
+              "id": "Battery"
+            }, {
+              "id": "Volume"
+            }, {
+              "id": "Brightness"
+            }, {
+              "id": "NightLight"
+            }, {
+              "id": "Clock"
+            }, {
+              "id": "SidePanelToggle"
+            }]
         }
       }
 
@@ -142,13 +230,11 @@ Singleton {
         property real radiusRatio: 1.0
         // Animation speed multiplier (0.1x - 2.0x)
         property real animationSpeed: 1.0
-        // Replace sidepanel toggle with distro logo (shown in bar and/or side panel)
-        property bool useDistroLogoForSidepanel: false
       }
 
       // location
       property JsonObject location: JsonObject {
-        property string name: "Tokyo"
+        property string name: defaultLocation
         property bool useFahrenheit: false
         property bool reverseDayMonth: false
         property bool use12HourClock: false
@@ -157,7 +243,7 @@ Singleton {
 
       // screen recorder
       property JsonObject screenRecorder: JsonObject {
-        property string directory: "~/Videos"
+        property string directory: defaultVideosDirectory
         property int frameRate: 60
         property string audioCodec: "opus"
         property string videoCodec: "h264"
@@ -171,7 +257,7 @@ Singleton {
       // wallpaper
       property JsonObject wallpaper: JsonObject {
         property bool enabled: true
-        property string directory: "/usr/share/wallpapers"
+        property string directory: defaultWallpapersDirectory
         property bool enableMultiMonitorDirectories: false
         property bool setWallpaperOnAllMonitors: true
         property string fillMode: "crop"
@@ -192,12 +278,14 @@ Singleton {
         property string position: "center"
         property real backgroundOpacity: 1.0
         property list<string> pinnedExecs: []
+        property bool useApp2Unit: false
       }
 
       // dock
       property JsonObject dock: JsonObject {
         property bool autoHide: false
         property bool exclusive: false
+        property real backgroundOpacity: 1.0
         property list<string> monitors: []
       }
 
@@ -209,6 +297,7 @@ Singleton {
 
       // notifications
       property JsonObject notifications: JsonObject {
+        property bool doNotDisturb: false
         property list<string> monitors: []
       }
 
@@ -267,6 +356,13 @@ Singleton {
         property string dayTemp: "6500"
         property string manualSunrise: "06:30"
         property string manualSunset: "18:30"
+      }
+
+      // hooks
+      property JsonObject hooks: JsonObject {
+        property bool enabled: false
+        property string wallpaperChange: ""
+        property string darkModeChange: ""
       }
     }
   }
