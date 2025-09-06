@@ -4,12 +4,14 @@ import QtQuick
 import Quickshell
 import qs.Commons
 import qs.Modules.Bar.Widgets
+import qs.Modules.Bar.Extras
 
 Singleton {
   id: root
 
   // Widget registry object mapping widget names to components
   property var widgets: ({
+                           "IdleInhibitor": idleInhibitorComponent,
                            "ActiveWindow": activeWindowComponent,
                            "ArchUpdater": archUpdaterComponent,
                            "Battery": batteryComponent,
@@ -47,6 +49,9 @@ Singleton {
                                 })
 
   // Component definitions - these are loaded once at startup
+  property Component idleInhibitorComponent: Component {
+    IdleInhibitorButton {}
+  }
   property Component activeWindowComponent: Component {
     ActiveWindow {}
   }
