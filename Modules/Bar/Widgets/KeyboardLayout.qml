@@ -12,9 +12,6 @@ Item {
 
   property ShellScreen screen
   property real scaling: 1.0
-  property string barSection: ""
-  property int sectionWidgetIndex: 0
-  property int sectionWidgetsCount: 0
 
   // Use the shared service for keyboard layout
   property string currentLayout: KeyboardLayoutService.currentLayout
@@ -27,9 +24,7 @@ Item {
 
     anchors.verticalCenter: parent.verticalCenter
     rightOpen: BarWidgetRegistry.getNPillDirection(root)
-    icon: "keyboard_alt"
-    iconCircleColor: Color.mPrimary
-    collapsedIconColor: Color.mOnSurface
+    icon: "keyboard"
     autoHide: false // Important to be false so we can hover as long as we want
     text: currentLayout
     tooltipText: "Keyboard layout: " + currentLayout

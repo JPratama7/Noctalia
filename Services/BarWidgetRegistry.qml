@@ -13,7 +13,6 @@ Singleton {
   property var widgets: ({
                            "IdleInhibitor": idleInhibitorComponent,
                            "ActiveWindow": activeWindowComponent,
-                           "ArchUpdater": archUpdaterComponent,
                            "Battery": batteryComponent,
                            "Bluetooth": bluetoothComponent,
                            "Brightness": brightnessComponent,
@@ -30,6 +29,7 @@ Singleton {
                            "PowerToggle": powerToggleComponent,
                            "ScreenRecorderIndicator": screenRecorderIndicatorComponent,
                            "SidePanelToggle": sidePanelToggleComponent,
+                           "Spacer": spacerComponent,
                            "SystemMonitor": systemMonitorComponent,
                            "Taskbar": taskbarComponent,
                            "Tray": trayComponent,
@@ -39,12 +39,73 @@ Singleton {
                          })
 
   property var widgetMetadata: ({
+                                  "ActiveWindow": {
+                                    "allowUserSettings": true,
+                                    "showIcon": true
+                                  },
+                                  "Battery": {
+                                    "allowUserSettings": true,
+                                    "alwaysShowPercentage": false,
+                                    "warningThreshold": 30
+                                  },
+                                  "Brightness": {
+                                    "allowUserSettings": true,
+                                    "alwaysShowPercentage": false
+                                  },
+                                  "Clock": {
+                                    "allowUserSettings": true,
+                                    "showDate": false,
+                                    "use12HourClock": false,
+                                    "showSeconds": false,
+                                    "reverseDayMonth": true
+                                  },
                                   "CustomButton": {
                                     "allowUserSettings": true,
-                                    "icon": "favorite",
+                                    "icon": "heart",
                                     "leftClickExec": "",
                                     "rightClickExec": "",
                                     "middleClickExec": ""
+                                  },
+                                  "Microphone": {
+                                    "allowUserSettings": true,
+                                    "alwaysShowPercentage": false
+                                  },
+                                  "NotificationHistory": {
+                                    "allowUserSettings": true,
+                                    "showUnreadBadge": true,
+                                    "hideWhenZero": true
+                                  },
+                                  "Spacer": {
+                                    "allowUserSettings": true,
+                                    "width": 20
+                                  },
+                                  "SystemMonitor": {
+                                    "allowUserSettings": true,
+                                    "showCpuUsage": true,
+                                    "showCpuTemp": true,
+                                    "showGpuTemp": false,
+                                    "showMemoryUsage": true,
+                                    "showMemoryAsPercent": false,
+                                    "showNetworkStats": false,
+                                    "showDiskUsage": false
+                                  },
+                                  "Workspace": {
+                                    "allowUserSettings": true,
+                                    "labelMode": "index"
+                                  },
+                                  "MediaMini": {
+                                    "allowUserSettings": true,
+                                    "showAlbumArt": false,
+                                    "showVisualizer": false,
+                                    "visualizerType": "linear"
+                                  },
+                                  "SidePanelToggle": {
+                                    "allowUserSettings": true,
+                                    "useDistroLogo": false
+                                  },
+                                  "Volume": {
+                                    "allowUserSettings": true,
+                                    "alwaysShowPercentage": false
                                   }
                                 })
 
@@ -54,9 +115,6 @@ Singleton {
   }
   property Component activeWindowComponent: Component {
     ActiveWindow {}
-  }
-  property Component archUpdaterComponent: Component {
-    ArchUpdater {}
   }
   property Component batteryComponent: Component {
     Battery {}
@@ -105,6 +163,9 @@ Singleton {
   }
   property Component sidePanelToggleComponent: Component {
     SidePanelToggle {}
+  }
+  property Component spacerComponent: Component {
+    Spacer {}
   }
   property Component systemMonitorComponent: Component {
     SystemMonitor {}

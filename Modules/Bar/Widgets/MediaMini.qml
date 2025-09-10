@@ -12,17 +12,44 @@ RowLayout {
 
   property ShellScreen screen
   property real scaling: 1.0
-  readonly property real minWidth: 160
-  readonly property real maxWidth: 400
+
+  // Widget properties passed from Bar.qml for per-instance settings
+  property string widgetId: ""
+  property string barSection: ""
+  property int sectionWidgetIndex: -1
+  property int sectionWidgetsCount: 0
+
+  property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
+  property var widgetSettings: {
+    var section = barSection.replace("Section", "").toLowerCase()
+    if (section && sectionWidgetIndex >= 0) {
+      var widgets = Settings.data.bar.widgets[section]
+      if (widgets && sectionWidgetIndex < widgets.length) {
+        return widgets[sectionWidgetIndex]
+      }
+    }
+    return {}
+  }
+
+  readonly property bool showAlbumArt: (widgetSettings.showAlbumArt
+                                        !== undefined) ? widgetSettings.showAlbumArt : widgetMetadata.showAlbumArt
+  readonly property bool showVisualizer: (widgetSettings.showVisualizer
+                                          !== undefined) ? widgetSettings.showVisualizer : widgetMetadata.showVisualizer
+  readonly property string visualizerType: (widgetSettings.visualizerType !== undefined && widgetSettings.visualizerType
+                                            !== "") ? widgetSettings.visualizerType : widgetMetadata.visualizerType
+
+  // 6% of total width
+  readonly property real minWidth: Math.max(1, screen.width * 0.06)
+  readonly property real maxWidth: minWidth * 2
+
+  function getTitle() {
+    return MediaService.trackTitle + (MediaService.trackArtist !== "" ? ` - ${MediaService.trackArtist}` : "")
+  }
 
   Layout.alignment: Qt.AlignVCenter
   spacing: Style.marginS * scaling
   visible: MediaService.currentPlayer !== null && MediaService.canPlay
   Layout.preferredWidth: MediaService.currentPlayer !== null && MediaService.canPlay ? implicitWidth : 0
-
-  function getTitle() {
-    return MediaService.trackTitle + (MediaService.trackArtist !== "" ? ` - ${MediaService.trackArtist}` : "")
-  }
 
   //  A hidden text element to safely measure the full title width
   NText {
@@ -58,8 +85,7 @@ RowLayout {
       Loader {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "linear"
-                && MediaService.isPlaying
+        active: showVisualizer && visualizerType == "linear" && MediaService.isPlaying
         z: 0
 
         sourceComponent: LinearSpectrum {
@@ -74,8 +100,7 @@ RowLayout {
       Loader {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "mirrored"
-                && MediaService.isPlaying
+        active: showVisualizer && visualizerType == "mirrored" && MediaService.isPlaying
         z: 0
 
         sourceComponent: MirroredSpectrum {
@@ -90,8 +115,7 @@ RowLayout {
       Loader {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        active: Settings.data.audio.showMiniplayerCava && Settings.data.audio.visualizerType == "wave"
-                && MediaService.isPlaying
+        active: showVisualizer && visualizerType == "wave" && MediaService.isPlaying
         z: 0
 
         sourceComponent: WaveSpectrum {
@@ -111,16 +135,16 @@ RowLayout {
 
         NIcon {
           id: windowIcon
-          text: MediaService.isPlaying ? "pause" : "play_arrow"
+          icon: MediaService.isPlaying ? "media-pause" : "media-play"
           font.pointSize: Style.fontSizeL * scaling
           verticalAlignment: Text.AlignVCenter
           Layout.alignment: Qt.AlignVCenter
-          visible: !Settings.data.audio.showMiniplayerAlbumArt && getTitle() !== "" && !trackArt.visible
+          visible: !showAlbumArt && getTitle() !== "" && !trackArt.visible
         }
 
         ColumnLayout {
           Layout.alignment: Qt.AlignVCenter
-          visible: Settings.data.audio.showMiniplayerAlbumArt
+          visible: showAlbumArt
           spacing: 0
 
           Item {
@@ -131,7 +155,8 @@ RowLayout {
               id: trackArt
               anchors.fill: parent
               imagePath: MediaService.trackArtUrl
-              fallbackIcon: MediaService.isPlaying ? "pause" : "play_arrow"
+              fallbackIcon: MediaService.isPlaying ? "media-pause" : "media-play"
+              fallbackIconSize: 10 * scaling
               borderWidth: 0
               border.color: Color.transparent
             }
@@ -155,7 +180,7 @@ RowLayout {
           font.weight: Style.fontWeightMedium
           elide: Text.ElideRight
           verticalAlignment: Text.AlignVCenter
-          color: Color.mTertiary
+          color: Color.mSecondary
 
           Behavior on Layout.preferredWidth {
             NumberAnimation {

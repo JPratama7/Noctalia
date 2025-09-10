@@ -3,6 +3,8 @@ import Quickshell
 import Quickshell.Wayland
 import qs.Commons
 import qs.Services
+import qs.Modules.SettingsPanel
+import qs.Widgets
 
 Variants {
   id: backgroundVariants
@@ -137,7 +139,7 @@ Variants {
         property real screenWidth: width
         property real screenHeight: height
 
-        fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_fade.frag.qsb")
+        fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/Shaders/qsb/wp_fade.frag.qsb")
       }
 
       // Wipe transition shader
@@ -162,7 +164,7 @@ Variants {
         property real screenWidth: width
         property real screenHeight: height
 
-        fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_wipe.frag.qsb")
+        fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/Shaders/qsb/wp_wipe.frag.qsb")
       }
 
       // Disc reveal transition shader
@@ -189,7 +191,7 @@ Variants {
         property real screenWidth: width
         property real screenHeight: height
 
-        fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_disc.frag.qsb")
+        fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/Shaders/qsb/wp_disc.frag.qsb")
       }
 
       // Diagonal stripes transition shader
@@ -216,7 +218,7 @@ Variants {
         property real screenWidth: width
         property real screenHeight: height
 
-        fragmentShader: Qt.resolvedUrl("../../Shaders/qsb/wp_stripes.frag.qsb")
+        fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/Shaders/qsb/wp_stripes.frag.qsb")
       }
 
       // Animation for the transition progress

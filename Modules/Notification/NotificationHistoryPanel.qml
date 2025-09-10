@@ -31,7 +31,7 @@ NPanel {
         spacing: Style.marginM * scaling
 
         NIcon {
-          text: "notifications"
+          icon: "bell"
           font.pointSize: Style.fontSizeXXL * scaling
           color: Color.mPrimary
         }
@@ -45,14 +45,15 @@ NPanel {
         }
 
         NIconButton {
-          icon: Settings.data.notifications.doNotDisturb ? "notifications_off" : "notifications_active"
+          icon: Settings.data.notifications.doNotDisturb ? "bell-off" : "bell"
           tooltipText: Settings.data.notifications.doNotDisturb ? "'Do Not Disturb' is enabled." : "'Do Not Disturb' is disabled."
           sizeRatio: 0.8
           onClicked: Settings.data.notifications.doNotDisturb = !Settings.data.notifications.doNotDisturb
+          onRightClicked: Settings.data.notifications.doNotDisturb = !Settings.data.notifications.doNotDisturb
         }
 
         NIconButton {
-          icon: "delete"
+          icon: "trash"
           tooltipText: "Clear history"
           sizeRatio: 0.8
           onClicked: NotificationService.clearHistory()
@@ -85,7 +86,7 @@ NPanel {
         }
 
         NIcon {
-          text: "notifications_off"
+          icon: "bell-off"
           font.pointSize: 64 * scaling
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
@@ -103,6 +104,9 @@ NPanel {
           font.pointSize: Style.fontSizeS * scaling
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
+          Layout.fillWidth: true
+          wrapMode: Text.Wrap
+          horizontalAlignment: Text.AlignHCenter
         }
 
         Item {
@@ -135,10 +139,29 @@ NPanel {
             anchors.margins: Style.marginM * scaling
             spacing: Style.marginM * scaling
 
+            // App icon (same style as popup)
+            NImageCircled {
+              Layout.preferredWidth: 28 * scaling
+              Layout.preferredHeight: 28 * scaling
+              Layout.alignment: Qt.AlignVCenter
+              // Prefer stable themed icons over transient image paths
+              imagePath: (appIcon
+                          && appIcon !== "") ? (AppIcons.iconFromName(appIcon, "application-x-executable")
+                                                || appIcon) : ((AppIcons.iconForAppId(desktopEntry
+                                                                                      || appName, "application-x-executable")
+                                                                || (image && image
+                                                                    !== "" ? image : AppIcons.iconFromName("application-x-executable",
+                                                                                                           "application-x-executable"))))
+              borderColor: Color.transparent
+              borderWidth: 0
+              visible: true
+            }
+
             // Notification content column
             ColumnLayout {
               Layout.fillWidth: true
               Layout.alignment: Qt.AlignVCenter
+              Layout.maximumWidth: notificationList.width - (Style.marginM * scaling * 4) // Account for margins and delete button
               spacing: Style.marginXXS * scaling
 
               NText {
@@ -148,7 +171,6 @@ NPanel {
                 color: notificationMouseArea.containsMouse ? Color.mSurface : Color.mPrimary
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                Layout.maximumWidth: parent.width
                 maximumLineCount: 2
                 elide: Text.ElideRight
               }
@@ -159,7 +181,6 @@ NPanel {
                 color: notificationMouseArea.containsMouse ? Color.mSurface : Color.mOnSurface
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                Layout.maximumWidth: parent.width
                 maximumLineCount: 3
                 elide: Text.ElideRight
                 visible: text.length > 0
@@ -175,7 +196,7 @@ NPanel {
 
             // Delete button
             NIconButton {
-              icon: "delete"
+              icon: "trash"
               tooltipText: "Delete notification"
               sizeRatio: 0.7
               Layout.alignment: Qt.AlignTop

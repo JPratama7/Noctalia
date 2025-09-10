@@ -58,29 +58,6 @@ Loader {
             property real percent: isReady ? (battery.percentage * 100) : 0
             property bool charging: isReady ? battery.state === UPowerDeviceState.Charging : false
             property bool batteryVisible: isReady && percent > 0
-
-            function getIcon() {
-              if (!batteryVisible)
-                return ""
-              if (charging)
-                return "battery_android_bolt"
-              if (percent >= 95)
-                return "battery_android_full"
-              if (percent >= 85)
-                return "battery_android_6"
-              if (percent >= 70)
-                return "battery_android_5"
-              if (percent >= 55)
-                return "battery_android_4"
-              if (percent >= 40)
-                return "battery_android_3"
-              if (percent >= 25)
-                return "battery_android_2"
-              if (percent >= 10)
-                return "battery_android_1"
-              if (percent >= 0)
-                return "battery_android_0"
-            }
           }
 
           Item {
@@ -420,7 +397,7 @@ Loader {
                     anchors.bottomMargin: Style.marginM * scaling
                     anchors.leftMargin: Style.marginL * scaling
                     anchors.rightMargin: Style.marginL * scaling
-                    spacing: Style.marginM * scaling
+                    spacing: Style.marginL * scaling
 
                     NText {
                       text: "SECURE TERMINAL"
@@ -433,23 +410,6 @@ Loader {
 
                     RowLayout {
                       spacing: Style.marginS * scaling
-                      visible: batteryIndicator.batteryVisible
-                      NIcon {
-                        text: batteryIndicator.getIcon()
-                        font.pointSize: Style.fontSizeM * scaling
-                        color: batteryIndicator.charging ? Color.mPrimary : Color.mOnSurface
-                      }
-                      NText {
-                        text: Math.round(batteryIndicator.percent) + "%"
-                        color: Color.mOnSurface
-                        font.family: Settings.data.ui.fontFixed
-                        font.pointSize: Style.fontSizeM * scaling
-                        font.weight: Style.fontWeightBold
-                      }
-                    }
-
-                    RowLayout {
-                      spacing: Style.marginS * scaling
                       NText {
                         text: keyboardLayout.currentLayout
                         color: Color.mOnSurface
@@ -458,9 +418,28 @@ Loader {
                         font.weight: Style.fontWeightBold
                       }
                       NIcon {
-                        text: "keyboard_alt"
+                        icon: "keyboard"
                         font.pointSize: Style.fontSizeM * scaling
                         color: Color.mOnSurface
+                      }
+                    }
+
+                    RowLayout {
+                      spacing: Style.marginS * scaling
+                      visible: batteryIndicator.batteryVisible
+                      NIcon {
+                        icon: BatteryService.getIcon(batteryIndicator.percent, batteryIndicator.charging,
+                                                     batteryIndicator.isReady)
+                        font.pointSize: Style.fontSizeM * scaling
+                        color: batteryIndicator.charging ? Color.mPrimary : Color.mOnSurface
+                        rotation: -90
+                      }
+                      NText {
+                        text: Math.round(batteryIndicator.percent) + "%"
+                        color: Color.mOnSurface
+                        font.family: Settings.data.ui.fontFixed
+                        font.pointSize: Style.fontSizeM * scaling
+                        font.weight: Style.fontWeightBold
                       }
                     }
                   }
@@ -739,19 +718,45 @@ Loader {
               anchors.margins: 50 * scaling
               spacing: 20 * scaling
 
+              // Shutdown
               Rectangle {
-                Layout.preferredWidth: 60 * scaling
-                Layout.preferredHeight: 60 * scaling
+                Layout.preferredWidth: iconPower.implicitWidth + Style.marginXL * scaling
+                Layout.preferredHeight: Layout.preferredWidth
                 radius: width * 0.5
                 color: powerButtonArea.containsMouse ? Color.mError : Qt.alpha(Color.mError, 0.2)
                 border.color: Color.mError
                 border.width: Math.max(1, Style.borderM * scaling)
 
                 NIcon {
+                  id: iconPower
                   anchors.centerIn: parent
-                  text: "power_settings_new"
-                  font.pointSize: Style.fontSizeXL * scaling
+                  icon: "shutdown"
+                  font.pointSize: Style.fontSizeXXXL * scaling
                   color: powerButtonArea.containsMouse ? Color.mOnError : Color.mError
+                }
+
+                // Tooltip (inline rectangle to avoid separate Window during lock)
+                Rectangle {
+                  anchors.horizontalCenter: parent.horizontalCenter
+                  anchors.bottom: parent.top
+                  anchors.bottomMargin: 12 * scaling
+                  radius: Style.radiusM * scaling
+                  color: Color.mSurface
+                  border.color: Color.mOutline
+                  border.width: Math.max(1, Style.borderS * scaling)
+                  visible: powerButtonArea.containsMouse
+                  z: 1
+                  NText {
+                    id: shutdownTooltipText
+                    anchors.margins: Style.marginM * scaling
+                    anchors.fill: parent
+                    text: "Shut down the computer."
+                    font.pointSize: Style.fontSizeM * scaling
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                  }
+                  implicitWidth: shutdownTooltipText.implicitWidth + Style.marginM * 2 * scaling
+                  implicitHeight: shutdownTooltipText.implicitHeight + Style.marginM * 2 * scaling
                 }
 
                 MouseArea {
@@ -764,19 +769,45 @@ Loader {
                 }
               }
 
+              // Reboot
               Rectangle {
-                Layout.preferredWidth: 60 * scaling
-                Layout.preferredHeight: 60 * scaling
+                Layout.preferredWidth: iconReboot.implicitWidth + Style.marginXL * scaling
+                Layout.preferredHeight: Layout.preferredWidth
                 radius: width * 0.5
                 color: restartButtonArea.containsMouse ? Color.mPrimary : Qt.alpha(Color.mPrimary, Style.opacityLight)
                 border.color: Color.mPrimary
                 border.width: Math.max(1, Style.borderM * scaling)
 
                 NIcon {
+                  id: iconReboot
                   anchors.centerIn: parent
-                  text: "restart_alt"
-                  font.pointSize: Style.fontSizeXL * scaling
+                  icon: "reboot"
+                  font.pointSize: Style.fontSizeXXXL * scaling
                   color: restartButtonArea.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                }
+
+                // Tooltip
+                Rectangle {
+                  anchors.horizontalCenter: parent.horizontalCenter
+                  anchors.bottom: parent.top
+                  anchors.bottomMargin: 12 * scaling
+                  radius: Style.radiusM * scaling
+                  color: Color.mSurface
+                  border.color: Color.mOutline
+                  border.width: Math.max(1, Style.borderS * scaling)
+                  visible: restartButtonArea.containsMouse
+                  z: 1
+                  NText {
+                    id: restartTooltipText
+                    anchors.margins: Style.marginM * scaling
+                    anchors.fill: parent
+                    text: "Restart the computer."
+                    font.pointSize: Style.fontSizeM * scaling
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                  }
+                  implicitWidth: restartTooltipText.implicitWidth + Style.marginM * 2 * scaling
+                  implicitHeight: restartTooltipText.implicitHeight + Style.marginM * 2 * scaling
                 }
 
                 MouseArea {
@@ -786,22 +817,49 @@ Loader {
                   onClicked: {
                     CompositorService.reboot()
                   }
+                  // Tooltip handled via inline rectangle visibility
                 }
               }
 
+              // Suspend
               Rectangle {
-                Layout.preferredWidth: 60 * scaling
-                Layout.preferredHeight: 60 * scaling
+                Layout.preferredWidth: iconSuspend.implicitWidth + Style.marginXL * scaling
+                Layout.preferredHeight: Layout.preferredWidth
                 radius: width * 0.5
                 color: suspendButtonArea.containsMouse ? Color.mSecondary : Qt.alpha(Color.mSecondary, 0.2)
                 border.color: Color.mSecondary
                 border.width: Math.max(1, Style.borderM * scaling)
 
                 NIcon {
+                  id: iconSuspend
                   anchors.centerIn: parent
-                  text: "bedtime"
-                  font.pointSize: Style.fontSizeXL * scaling
+                  icon: "suspend"
+                  font.pointSize: Style.fontSizeXXXL * scaling
                   color: suspendButtonArea.containsMouse ? Color.mOnSecondary : Color.mSecondary
+                }
+
+                // Tooltip
+                Rectangle {
+                  anchors.horizontalCenter: parent.horizontalCenter
+                  anchors.bottom: parent.top
+                  anchors.bottomMargin: 12 * scaling
+                  radius: Style.radiusM * scaling
+                  color: Color.mSurface
+                  border.color: Color.mOutline
+                  border.width: Math.max(1, Style.borderS * scaling)
+                  visible: suspendButtonArea.containsMouse
+                  z: 1
+                  NText {
+                    id: suspendTooltipText
+                    anchors.margins: Style.marginM * scaling
+                    anchors.fill: parent
+                    text: "Suspend the system."
+                    font.pointSize: Style.fontSizeM * scaling
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                  }
+                  implicitWidth: suspendTooltipText.implicitWidth + Style.marginM * 2 * scaling
+                  implicitHeight: suspendTooltipText.implicitHeight + Style.marginM * 2 * scaling
                 }
 
                 MouseArea {
@@ -811,6 +869,7 @@ Loader {
                   onClicked: {
                     CompositorService.suspend()
                   }
+                  // Tooltip handled via inline rectangle visibility
                 }
               }
             }

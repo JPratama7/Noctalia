@@ -47,7 +47,8 @@ NBox {
       }
       NText {
         text: `System uptime: ${uptimeText}`
-        color: Color.mOnSurface
+        font.pointSize: Style.fontSizeS * scaling
+        color: Color.mOnSurfaceVariant
       }
     }
 
@@ -68,7 +69,7 @@ NBox {
 
       NIconButton {
         id: powerButton
-        icon: "power_settings_new"
+        icon: "power"
         tooltipText: "Power menu."
         onClicked: {
           powerPanel.open(screen)
