@@ -44,12 +44,11 @@ ColumnLayout {
       model: Quickshell.screens || []
       delegate: Rectangle {
         Layout.fillWidth: true
-        Layout.minimumWidth: 550 * scaling
+        implicitHeight: contentCol.implicitHeight + Style.marginXL * 2 * scaling
         radius: Style.radiusM * scaling
         color: Color.mSurface
         border.color: Color.mOutline
         border.width: Math.max(1, Style.borderS * scaling)
-        implicitHeight: contentCol.implicitHeight + Style.marginXL * 2 * scaling
 
         property real localScaling: ScalingService.getScreenScale(modelData)
         Connections {
@@ -107,11 +106,9 @@ ColumnLayout {
               checked: (Settings.data.notifications.monitors || []).indexOf(modelData.name) !== -1
               onToggled: checked => {
                            if (checked) {
-                             Settings.data.notifications.monitors = addMonitor(Settings.data.notifications.monitors,
-                                                                               modelData.name)
+                             Settings.data.notifications.monitors = addMonitor(Settings.data.notifications.monitors, modelData.name)
                            } else {
-                             Settings.data.notifications.monitors = removeMonitor(Settings.data.notifications.monitors,
-                                                                                  modelData.name)
+                             Settings.data.notifications.monitors = removeMonitor(Settings.data.notifications.monitors, modelData.name)
                            }
                          }
             }
@@ -177,7 +174,6 @@ ColumnLayout {
                   value: localScaling
                   onPressedChanged: ScalingService.setScreenScale(modelData, value)
                   Layout.fillWidth: true
-                  Layout.minimumWidth: 150 * scaling
                 }
 
                 NIconButton {

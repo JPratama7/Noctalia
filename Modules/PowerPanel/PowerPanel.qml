@@ -13,8 +13,8 @@ import qs.Widgets
 NPanel {
   id: root
 
-  panelWidth: 440 * scaling
-  panelHeight: 380 * scaling
+  preferredWidth: 440
+  preferredHeight: 410
   panelAnchorHorizontalCenter: true
   panelAnchorVerticalCenter: true
   panelKeyboardFocus: true
@@ -224,6 +224,7 @@ NPanel {
           root.close()
         }
       }
+      context: Qt.WidgetShortcut
       enabled: root.opened
     }
 
@@ -262,8 +263,7 @@ NPanel {
         Layout.preferredHeight: Style.baseWidgetSize * 0.8 * scaling
 
         NText {
-          text: timerActive ? `${pendingAction.charAt(0).toUpperCase() + pendingAction.slice(1)} in ${Math.ceil(
-                                timeRemaining / 1000)} seconds...` : "Power Options"
+          text: timerActive ? `${pendingAction.charAt(0).toUpperCase() + pendingAction.slice(1)} in ${Math.ceil(timeRemaining / 1000)} seconds...` : "Power Menu"
           font.weight: Style.fontWeightBold
           font.pointSize: Style.fontSizeL * scaling
           color: timerActive ? Color.mPrimary : Color.mOnSurface
@@ -290,6 +290,10 @@ NPanel {
             }
           }
         }
+      }
+
+      NDivider {
+        Layout.fillWidth: true
       }
 
       // Power options
@@ -337,7 +341,7 @@ NPanel {
         return Qt.alpha(Color.mPrimary, 0.08)
       }
       if (isSelected || mouseArea.containsMouse) {
-        return Color.mSecondary
+        return Color.mTertiary
       }
       return Color.transparent
     }
@@ -367,7 +371,7 @@ NPanel {
           if (buttonRoot.isShutdown && !buttonRoot.isSelected && !mouseArea.containsMouse)
             return Color.mError
           if (buttonRoot.isSelected || mouseArea.containsMouse)
-            return Color.mOnSecondary
+            return Color.mOnTertiary
           return Color.mOnSurface
         }
         font.pointSize: Style.fontSizeXXXL * scaling
@@ -401,7 +405,7 @@ NPanel {
             if (buttonRoot.isShutdown && !buttonRoot.isSelected && !mouseArea.containsMouse)
               return Color.mError
             if (buttonRoot.isSelected || mouseArea.containsMouse)
-              return Color.mOnSecondary
+              return Color.mOnTertiary
             return Color.mOnSurface
           }
 
@@ -426,7 +430,7 @@ NPanel {
             if (buttonRoot.isShutdown && !buttonRoot.isSelected && !mouseArea.containsMouse)
               return Color.mError
             if (buttonRoot.isSelected || mouseArea.containsMouse)
-              return Color.mOnSecondary
+              return Color.mOnTertiary
             return Color.mOnSurfaceVariant
           }
           opacity: Style.opacityHeavy

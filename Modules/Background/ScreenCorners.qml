@@ -7,7 +7,7 @@ import qs.Services
 import qs.Widgets
 
 Loader {
-  active: Settings.data.general.showScreenCorners
+  active: Settings.data.general.showScreenCorners && !Settings.data.bar.floating
 
   sourceComponent: Variants {
     model: Quickshell.screens
@@ -20,8 +20,8 @@ Loader {
       screen: modelData
 
       property color cornerColor: Qt.alpha(Color.mSurface, Settings.data.bar.backgroundOpacity)
-      property real cornerRadius: 20 * scaling
-      property real cornerSize: 20 * scaling
+      property real cornerRadius: Style.screenRadius * scaling
+      property real cornerSize: Style.screenRadius * scaling
 
       Connections {
         target: ScalingService
@@ -46,12 +46,8 @@ Loader {
       }
 
       margins {
-        top: ((modelData && Settings.data.bar.monitors.includes(modelData.name))
-              || (Settings.data.bar.monitors.length === 0)) && Settings.data.bar.position === "top"
-             && Settings.data.bar.backgroundOpacity > 0 ? Math.round(Style.barHeight * scaling) : 0
-        bottom: ((modelData && Settings.data.bar.monitors.includes(modelData.name))
-                 || (Settings.data.bar.monitors.length === 0)) && Settings.data.bar.position === "bottom"
-                && Settings.data.bar.backgroundOpacity > 0 ? Math.round(Style.barHeight * scaling) : 0
+        top: ((modelData && Settings.data.bar.monitors.includes(modelData.name)) || (Settings.data.bar.monitors.length === 0)) && Settings.data.bar.position === "top" && Settings.data.bar.backgroundOpacity > 0 ? Math.round(Style.barHeight * scaling) : 0
+        bottom: ((modelData && Settings.data.bar.monitors.includes(modelData.name)) || (Settings.data.bar.monitors.length === 0)) && Settings.data.bar.position === "bottom" && Settings.data.bar.backgroundOpacity > 0 ? Math.round(Style.barHeight * scaling) : 0
       }
 
       mask: Region {}

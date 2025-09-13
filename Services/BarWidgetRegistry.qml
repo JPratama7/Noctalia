@@ -54,9 +54,8 @@ Singleton {
                                   },
                                   "Clock": {
                                     "allowUserSettings": true,
-                                    "showDate": false,
+                                    "displayFormat": "time-date-short",
                                     "use12HourClock": false,
-                                    "showSeconds": false,
                                     "reverseDayMonth": true
                                   },
                                   "CustomButton": {
@@ -83,7 +82,6 @@ Singleton {
                                     "allowUserSettings": true,
                                     "showCpuUsage": true,
                                     "showCpuTemp": true,
-                                    "showGpuTemp": false,
                                     "showMemoryUsage": true,
                                     "showMemoryAsPercent": false,
                                     "showNetworkStats": false,
@@ -91,7 +89,8 @@ Singleton {
                                   },
                                   "Workspace": {
                                     "allowUserSettings": true,
-                                    "labelMode": "index"
+                                    "labelMode": "index",
+                                    "hideUnoccupied": false
                                   },
                                   "MediaMini": {
                                     "allowUserSettings": true,
@@ -106,6 +105,10 @@ Singleton {
                                   "Volume": {
                                     "allowUserSettings": true,
                                     "alwaysShowPercentage": false
+                                  },
+                                  "KeyboardLayout": {
+                                    "allowUserSettings": true,
+                                    "forceOpen": false
                                   }
                                 })
 
@@ -209,9 +212,9 @@ Singleton {
 
   function getNPillDirection(widget) {
     try {
-      if (widget.barSection === "leftSection") {
+      if (widget.section === "left") {
         return true
-      } else if (widget.barSection === "rightSection") {
+      } else if (widget.section === "right") {
         return false
       } else {
         // middle section

@@ -16,13 +16,12 @@ Item {
 
   // Widget properties passed from Bar.qml for per-instance settings
   property string widgetId: ""
-  property string barSection: ""
+  property string section: ""
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
   property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
   property var widgetSettings: {
-    var section = barSection.replace("Section", "").toLowerCase()
     if (section && sectionWidgetIndex >= 0) {
       var widgets = Settings.data.bar.widgets[section]
       if (widgets && sectionWidgetIndex < widgets.length) {
@@ -33,6 +32,7 @@ Item {
   }
 
   readonly property string labelMode: (widgetSettings.labelMode !== undefined) ? widgetSettings.labelMode : widgetMetadata.labelMode
+  readonly property bool hideUnoccupied: (widgetSettings.hideUnoccupied !== undefined) ? widgetSettings.hideUnoccupied : widgetMetadata.hideUnoccupied
 
   property bool isDestroying: false
   property bool hovered: false
@@ -77,6 +77,7 @@ Item {
   }
 
   onScreenChanged: refreshWorkspaces()
+  onHideUnoccupiedChanged: refreshWorkspaces()
 
   Connections {
     target: WorkspaceService
@@ -91,6 +92,9 @@ Item {
       for (var i = 0; i < WorkspaceService.workspaces.count; i++) {
         const ws = WorkspaceService.workspaces.get(i)
         if (ws.output.toLowerCase() === screen.name.toLowerCase()) {
+          if (hideUnoccupied && !ws.isOccupied && !ws.isFocused) {
+            continue
+          }
           localWorkspaces.append(ws)
         }
       }
@@ -197,8 +201,6 @@ Item {
                     return Color.mOnError
                   if (model.isActive || model.isOccupied)
                     return Color.mOnSecondary
-                  if (model.isUrgent)
-                    return Color.mOnError
 
                   return Color.mOnSurface
                 }
@@ -214,8 +216,6 @@ Item {
               return Color.mError
             if (model.isActive || model.isOccupied)
               return Color.mSecondary
-            if (model.isUrgent)
-              return Color.mError
 
             return Color.mOutline
           }

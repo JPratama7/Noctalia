@@ -15,13 +15,12 @@ RowLayout {
 
   // Widget properties passed from Bar.qml for per-instance settings
   property string widgetId: ""
-  property string barSection: ""
+  property string section: ""
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
   property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
   property var widgetSettings: {
-    var section = barSection.replace("Section", "").toLowerCase()
     if (section && sectionWidgetIndex >= 0) {
       var widgets = Settings.data.bar.widgets[section]
       if (widgets && sectionWidgetIndex < widgets.length) {
@@ -31,12 +30,9 @@ RowLayout {
     return {}
   }
 
-  readonly property bool showAlbumArt: (widgetSettings.showAlbumArt
-                                        !== undefined) ? widgetSettings.showAlbumArt : widgetMetadata.showAlbumArt
-  readonly property bool showVisualizer: (widgetSettings.showVisualizer
-                                          !== undefined) ? widgetSettings.showVisualizer : widgetMetadata.showVisualizer
-  readonly property string visualizerType: (widgetSettings.visualizerType !== undefined && widgetSettings.visualizerType
-                                            !== "") ? widgetSettings.visualizerType : widgetMetadata.visualizerType
+  readonly property bool showAlbumArt: (widgetSettings.showAlbumArt !== undefined) ? widgetSettings.showAlbumArt : widgetMetadata.showAlbumArt
+  readonly property bool showVisualizer: (widgetSettings.showVisualizer !== undefined) ? widgetSettings.showVisualizer : widgetMetadata.showVisualizer
+  readonly property string visualizerType: (widgetSettings.visualizerType !== undefined && widgetSettings.visualizerType !== "") ? widgetSettings.visualizerType : widgetMetadata.visualizerType
 
   // 6% of total width
   readonly property real minWidth: Math.max(1, screen.width * 0.06)

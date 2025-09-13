@@ -13,13 +13,12 @@ RowLayout {
 
   // Widget properties passed from Bar.qml for per-instance settings
   property string widgetId: ""
-  property string barSection: ""
+  property string section: ""
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
   property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
   property var widgetSettings: {
-    var section = barSection.replace("Section", "").toLowerCase()
     if (section && sectionWidgetIndex >= 0) {
       var widgets = Settings.data.bar.widgets[section]
       if (widgets && sectionWidgetIndex < widgets.length) {
@@ -29,19 +28,12 @@ RowLayout {
     return {}
   }
 
-  readonly property bool showCpuUsage: (widgetSettings.showCpuUsage
-                                        !== undefined) ? widgetSettings.showCpuUsage : widgetMetadata.showCpuUsage
+  readonly property bool showCpuUsage: (widgetSettings.showCpuUsage !== undefined) ? widgetSettings.showCpuUsage : widgetMetadata.showCpuUsage
   readonly property bool showCpuTemp: (widgetSettings.showCpuTemp !== undefined) ? widgetSettings.showCpuTemp : widgetMetadata.showCpuTemp
-  readonly property bool showMemoryUsage: (widgetSettings.showMemoryUsage
-                                           !== undefined) ? widgetSettings.showMemoryUsage : widgetMetadata.showMemoryUsage
-  readonly property bool showMemoryAsPercent: (widgetSettings.showMemoryAsPercent
-                                               !== undefined) ? widgetSettings.showMemoryAsPercent : widgetMetadata.showMemoryAsPercent
-  readonly property bool showNetworkStats: (widgetSettings.showNetworkStats
-                                            !== undefined) ? widgetSettings.showNetworkStats : widgetMetadata.showNetworkStats
-  readonly property bool showDiskUsage: (widgetSettings.showDiskUsage
-                                         !== undefined) ? widgetSettings.showDiskUsage : widgetMetadata.showDiskUsage
-  readonly property bool showGpuTemp: (widgetSettings.showGpuTemp !== undefined) ? widgetSettings.showGpuTemp : (widgetMetadata.showGpuTemp
-                                                                                                                 || false)
+  readonly property bool showMemoryUsage: (widgetSettings.showMemoryUsage !== undefined) ? widgetSettings.showMemoryUsage : widgetMetadata.showMemoryUsage
+  readonly property bool showMemoryAsPercent: (widgetSettings.showMemoryAsPercent !== undefined) ? widgetSettings.showMemoryAsPercent : widgetMetadata.showMemoryAsPercent
+  readonly property bool showNetworkStats: (widgetSettings.showNetworkStats !== undefined) ? widgetSettings.showNetworkStats : widgetMetadata.showNetworkStats
+  readonly property bool showDiskUsage: (widgetSettings.showDiskUsage !== undefined) ? widgetSettings.showDiskUsage : widgetMetadata.showDiskUsage
 
   Layout.alignment: Qt.AlignVCenter
   spacing: Style.marginS * scaling
@@ -111,36 +103,6 @@ RowLayout {
 
           NText {
             text: `${SystemStatService.cpuTemp}°C`
-            font.family: Settings.data.ui.fontFixed
-            font.pointSize: Style.fontSizeXS * scaling
-            font.weight: Style.fontWeightMedium
-            Layout.alignment: Qt.AlignVCenter
-            verticalAlignment: Text.AlignVCenter
-            color: Color.mPrimary
-          }
-        }
-      }
-
-      // GPU Temperature Component
-      Item {
-        Layout.preferredWidth: gpuTempRow.implicitWidth
-        Layout.preferredHeight: Math.round(Style.capsuleHeight * scaling)
-        Layout.alignment: Qt.AlignVCenter
-        visible: showGpuTemp
-
-        RowLayout {
-          id: gpuTempRow
-          anchors.centerIn: parent
-          spacing: Style.marginXS * scaling
-
-          NIcon {
-            icon: "gpu-temperature"
-            font.pointSize: Style.fontSizeS * scaling
-            Layout.alignment: Qt.AlignVCenter
-          }
-
-          NText {
-            text: `${SystemStatService.gpuTemp}°C`
             font.family: Settings.data.ui.fontFixed
             font.pointSize: Style.fontSizeXS * scaling
             font.weight: Style.fontWeightMedium

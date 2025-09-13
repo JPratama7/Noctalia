@@ -14,13 +14,12 @@ Item {
 
   // Widget properties passed from Bar.qml for per-instance settings
   property string widgetId: ""
-  property string barSection: ""
+  property string section: ""
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
   property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
   property var widgetSettings: {
-    var section = barSection.replace("Section", "").toLowerCase()
     if (section && sectionWidgetIndex >= 0) {
       var widgets = Settings.data.bar.widgets[section]
       if (widgets && sectionWidgetIndex < widgets.length) {
@@ -31,10 +30,8 @@ Item {
   }
 
   // Resolve settings: try user settings or defaults from BarWidgetRegistry
-  readonly property bool alwaysShowPercentage: widgetSettings.alwaysShowPercentage
-                                               !== undefined ? widgetSettings.alwaysShowPercentage : widgetMetadata.alwaysShowPercentage
-  readonly property real warningThreshold: widgetSettings.warningThreshold
-                                           !== undefined ? widgetSettings.warningThreshold : widgetMetadata.warningThreshold
+  readonly property bool alwaysShowPercentage: widgetSettings.alwaysShowPercentage !== undefined ? widgetSettings.alwaysShowPercentage : widgetMetadata.alwaysShowPercentage
+  readonly property real warningThreshold: widgetSettings.warningThreshold !== undefined ? widgetSettings.warningThreshold : widgetMetadata.warningThreshold
 
   // Test mode
   readonly property bool testMode: false
@@ -43,8 +40,7 @@ Item {
 
   // Main properties
   readonly property var battery: UPower.displayDevice
-  readonly property bool isReady: testMode ? true : (battery && battery.ready && battery.isLaptopBattery
-                                                     && battery.isPresent)
+  readonly property bool isReady: testMode ? true : (battery && battery.ready && battery.isLaptopBattery && battery.isPresent)
   readonly property real percent: testMode ? testPercent : (isReady ? (battery.percentage * 100) : 0)
   readonly property bool charging: testMode ? testCharging : (isReady ? battery.state === UPowerDeviceState.Charging : false)
   property bool hasNotifiedLowBattery: false
@@ -89,8 +85,7 @@ Item {
     id: pill
 
     rightOpen: BarWidgetRegistry.getNPillDirection(root)
-    icon: testMode ? BatteryService.getIcon(testPercent, testCharging, true) : BatteryService.getIcon(percent,
-                                                                                                      charging, isReady)
+    icon: testMode ? BatteryService.getIcon(testPercent, testCharging, true) : BatteryService.getIcon(percent, charging, isReady)
     text: (isReady || testMode) ? Math.round(percent) + "%" : "-"
     autoHide: false
     forceOpen: isReady && (testMode || battery.isLaptopBattery) && alwaysShowPercentage
@@ -113,8 +108,7 @@ Item {
       if (battery.changeRate !== undefined) {
         const rate = battery.changeRate
         if (rate > 0) {
-          lines.push(charging ? "Charging rate: " + rate.toFixed(2) + " W." : "Discharging rate: " + rate.toFixed(
-                                  2) + " W.")
+          lines.push(charging ? "Charging rate: " + rate.toFixed(2) + " W." : "Discharging rate: " + rate.toFixed(2) + " W.")
         } else if (rate < 0) {
           lines.push("Discharging rate: " + Math.abs(rate).toFixed(2) + " W.")
         } else {

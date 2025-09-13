@@ -27,8 +27,7 @@ Variants {
       }
     }
 
-    active: Settings.isLoaded && modelData && modelData.name ? (Settings.data.bar.monitors.includes(modelData.name)
-                                                                || (Settings.data.bar.monitors.length === 0)) : false
+    active: Settings.isLoaded && modelData && modelData.name ? (Settings.data.bar.monitors.includes(modelData.name) || (Settings.data.bar.monitors.length === 0)) : false
 
     sourceComponent: PanelWindow {
       screen: modelData || null
@@ -45,6 +44,14 @@ Variants {
         right: true
       }
 
+      // Floating bar margins - only apply when floating is enabled
+      margins {
+        top: Settings.data.bar.floating ? Settings.data.bar.marginTop : 0
+        bottom: Settings.data.bar.floating ? Settings.data.bar.marginBottom : 0
+        left: Settings.data.bar.floating ? Settings.data.bar.marginLeft : 0
+        right: Settings.data.bar.floating ? Settings.data.bar.marginRight : 0
+      }
+
       Item {
         anchors.fill: parent
         clip: true
@@ -55,6 +62,9 @@ Variants {
 
           anchors.fill: parent
           color: Qt.alpha(Color.mSurface, Settings.data.bar.backgroundOpacity)
+
+          // Floating bar rounded corners
+          radius: Settings.data.bar.floating ? Settings.data.bar.rounding : 0
         }
 
         // ------------------------------
@@ -77,7 +87,7 @@ Variants {
                 "screen": root.modelData || null,
                 "scaling": ScalingService.getScreenScale(screen),
                 "widgetId": modelData.id,
-                "barSection": parent.objectName,
+                "section": parent.objectName.replace("Section", "").toLowerCase(),
                 "sectionWidgetIndex": index,
                 "sectionWidgetsCount": Settings.data.bar.widgets.left.length
               }
@@ -105,7 +115,7 @@ Variants {
                 "screen": root.modelData || null,
                 "scaling": ScalingService.getScreenScale(screen),
                 "widgetId": modelData.id,
-                "barSection": parent.objectName,
+                "section": parent.objectName.replace("Section", "").toLowerCase(),
                 "sectionWidgetIndex": index,
                 "sectionWidgetsCount": Settings.data.bar.widgets.center.length
               }
@@ -134,7 +144,7 @@ Variants {
                 "screen": root.modelData || null,
                 "scaling": ScalingService.getScreenScale(screen),
                 "widgetId": modelData.id,
-                "barSection": parent.objectName,
+                "section": parent.objectName.replace("Section", "").toLowerCase(),
                 "sectionWidgetIndex": index,
                 "sectionWidgetsCount": Settings.data.bar.widgets.right.length
               }

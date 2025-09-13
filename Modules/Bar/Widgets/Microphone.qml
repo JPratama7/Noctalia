@@ -15,13 +15,12 @@ Item {
 
   // Widget properties passed from Bar.qml for per-instance settings
   property string widgetId: ""
-  property string barSection: ""
+  property string section: ""
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
   property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
   property var widgetSettings: {
-    var section = barSection.replace("Section", "").toLowerCase()
     if (section && sectionWidgetIndex >= 0) {
       var widgets = Settings.data.bar.widgets[section]
       if (widgets && sectionWidgetIndex < widgets.length) {
@@ -31,8 +30,7 @@ Item {
     return {}
   }
 
-  readonly property bool alwaysShowPercentage: (widgetSettings.alwaysShowPercentage
-                                                !== undefined) ? widgetSettings.alwaysShowPercentage : widgetMetadata.alwaysShowPercentage
+  readonly property bool alwaysShowPercentage: (widgetSettings.alwaysShowPercentage !== undefined) ? widgetSettings.alwaysShowPercentage : widgetMetadata.alwaysShowPercentage
 
   // Used to avoid opening the pill on Quickshell startup
   property bool firstInputVolumeReceived: false
@@ -95,8 +93,7 @@ Item {
     autoHide: false // Important to be false so we can hover as long as we want
     text: Math.floor(AudioService.inputVolume * 100) + "%"
     forceOpen: alwaysShowPercentage
-    tooltipText: "Microphone: " + Math.round(AudioService.inputVolume * 100)
-                 + "%\nLeft click for advanced settings.\nScroll up/down to change volume.\nRight click to toggle mute."
+    tooltipText: "Microphone: " + Math.round(AudioService.inputVolume * 100) + "%\nLeft click for advanced settings.\nScroll up/down to change volume.\nRight click to toggle mute."
 
     onWheel: function (delta) {
       wheelAccumulator += delta
@@ -111,7 +108,7 @@ Item {
     onClicked: {
       var settingsPanel = PanelService.getPanel("settingsPanel")
       settingsPanel.requestedTab = SettingsPanel.Tab.Audio
-      settingsPanel.open(screen)
+      settingsPanel.open()
     }
     onRightClicked: {
       AudioService.setInputMuted(!AudioService.inputMuted)

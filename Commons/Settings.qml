@@ -13,11 +13,8 @@ Singleton {
   // Default config directory: ~/.config/noctalia
   // Default cache directory: ~/.cache/noctalia
   property string shellName: "noctalia"
-  property string configDir: Quickshell.env("NOCTALIA_CONFIG_DIR") || (Quickshell.env("XDG_CONFIG_HOME")
-                                                                       || Quickshell.env(
-                                                                         "HOME") + "/.config") + "/" + shellName + "/"
-  property string cacheDir: Quickshell.env("NOCTALIA_CACHE_DIR") || (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env(
-                                                                       "HOME") + "/.cache") + "/" + shellName + "/"
+  property string configDir: Quickshell.env("NOCTALIA_CONFIG_DIR") || (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/" + shellName + "/"
+  property string cacheDir: Quickshell.env("NOCTALIA_CACHE_DIR") || (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/" + shellName + "/"
   property string cacheDirImages: cacheDir + "images/"
 
   property string settingsFile: Quickshell.env("NOCTALIA_SETTINGS_FILE") || (configDir + "settings.json")
@@ -58,8 +55,7 @@ Singleton {
         }
       }
       if (!hasValidBarMonitor) {
-        Logger.warn("Settings",
-                    "No configured bar monitors found on system, clearing bar monitor list to show on all screens")
+        Logger.warn("Settings", "No configured bar monitors found on system, clearing bar monitor list to show on all screens")
         adapter.bar.monitors = []
       } else {
 
@@ -138,13 +134,18 @@ Singleton {
       widget.showIcon = widget.showIcon !== undefined ? widget.showIcon : adapter.bar.showActiveWindowIcon
       break
     case "Battery":
-      widget.alwaysShowPercentage = widget.alwaysShowPercentage
-          !== undefined ? widget.alwaysShowPercentage : adapter.bar.alwaysShowBatteryPercentage
+      widget.alwaysShowPercentage = widget.alwaysShowPercentage !== undefined ? widget.alwaysShowPercentage : adapter.bar.alwaysShowBatteryPercentage
       break
     case "Clock":
-      widget.showDate = widget.showDate !== undefined ? widget.showDate : adapter.location.showDateWithClock
       widget.use12HourClock = widget.use12HourClock !== undefined ? widget.use12HourClock : adapter.location.use12HourClock
       widget.reverseDayMonth = widget.reverseDayMonth !== undefined ? widget.reverseDayMonth : adapter.location.reverseDayMonth
+      if (widget.showDate !== undefined) {
+        widget.displayFormat = "time-date"
+      } else if (widget.showSeconds) {
+        widget.displayFormat = "time-seconds"
+      }
+      delete widget.showDate
+      delete widget.showSeconds
       break
     case "MediaMini":
       widget.showAlbumArt = widget.showAlbumArt !== undefined ? widget.showAlbumArt : adapter.audio.showMiniplayerAlbumArt
@@ -174,7 +175,7 @@ Singleton {
       }
     }
 
-    // Backup the widget definition before altering
+    // Compare settings, to detect if something has been upgraded
     const widgetAfter = JSON.stringify(widget)
     return (widgetAfter !== widgetBefore)
   }
@@ -258,13 +259,21 @@ Singleton {
     JsonAdapter {
       id: adapter
 
-      property int settingsVersion: 1
+      property int settingsVersion: 2
 
       // bar
       property JsonObject bar: JsonObject {
         property string position: "top" // "top" or "bottom"
         property real backgroundOpacity: 1.0
         property list<string> monitors: []
+
+        // Floating bar settings
+        property bool floating: false
+        property real rounding: 12.0
+        property real marginTop: 16.0
+        property real marginBottom: 16.0
+        property real marginLeft: 16.0
+        property real marginRight: 16.0
 
         property bool showActiveWindowIcon: true // TODO: delete
         property bool alwaysShowBatteryPercentage: false // TODO: delete
@@ -317,6 +326,7 @@ Singleton {
         property bool dimDesktop: false
         property bool showScreenCorners: false
         property real radiusRatio: 1.0
+        property real screenRadiusRatio: 1.0
         // Animation speed multiplier (0.1x - 2.0x)
         property real animationSpeed: 1.0
       }
@@ -376,6 +386,7 @@ Singleton {
         property bool autoHide: false
         property bool exclusive: false
         property real backgroundOpacity: 1.0
+        property real floatingRatio: 1.0
         property list<string> monitors: []
       }
 

@@ -11,8 +11,9 @@ import qs.Widgets
 NPanel {
   id: root
 
-  panelWidth: 380 * scaling
-  panelHeight: 500 * scaling
+  preferredWidth: 380
+  preferredHeight: 500
+  panelKeyboardFocus: true
 
   panelContent: Rectangle {
     color: Color.transparent
@@ -42,7 +43,7 @@ NPanel {
         }
 
         NToggle {
-          id: wifiSwitch
+          id: bluetoothSwitch
           checked: Settings.data.network.bluetoothEnabled
           onToggled: checked => BluetoothService.setBluetoothEnabled(checked)
           baseSize: Style.baseWidgetSize * 0.65 * scaling
@@ -75,7 +76,7 @@ NPanel {
       }
 
       Rectangle {
-        visible: !Settings.data.network.bluetoothEnabled
+        visible: !(BluetoothService.adapter && BluetoothService.adapter.enabled)
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: Color.transparent
@@ -108,12 +109,12 @@ NPanel {
         }
       }
 
-      ScrollView {
+      NScrollView {
         visible: BluetoothService.adapter && BluetoothService.adapter.enabled
         Layout.fillWidth: true
         Layout.fillHeight: true
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        horizontalPolicy: ScrollBar.AlwaysOff
+        verticalPolicy: ScrollBar.AsNeeded
         clip: true
         contentWidth: availableWidth
 
@@ -142,8 +143,7 @@ NPanel {
             property var items: {
               if (!BluetoothService.adapter || !Bluetooth.devices)
                 return []
-              var filtered = Bluetooth.devices.values.filter(dev => dev && !dev.blocked && !dev.connected
-                                                             && (dev.paired || dev.trusted))
+              var filtered = Bluetooth.devices.values.filter(dev => dev && !dev.blocked && !dev.connected && (dev.paired || dev.trusted))
               return BluetoothService.sortDevices(filtered)
             }
             model: items
@@ -175,10 +175,7 @@ NPanel {
               }
 
               var availableCount = Bluetooth.devices.values.filter(dev => {
-                                                                     return dev && !dev.paired && !dev.pairing
-                                                                     && !dev.blocked
-                                                                     && (dev.signalStrength === undefined
-                                                                         || dev.signalStrength > 0)
+                                                                     return dev && !dev.paired && !dev.pairing && !dev.blocked && (dev.signalStrength === undefined || dev.signalStrength > 0)
                                                                    }).length
               return (availableCount === 0)
             }
